@@ -74,6 +74,9 @@ return [
             'prefix' => '',
             'prefix_indexes' => true,
             'schema' => 'public',
+            'options' => [
+                PDO::PGSQL_ATTR_DISABLE_PREPARES => true,
+            ],
         ],
 
         'sqlsrv' => [
