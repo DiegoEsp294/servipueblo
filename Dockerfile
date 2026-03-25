@@ -3,7 +3,7 @@ FROM php:7.4-cli
 # Dependencias del sistema
 RUN apt-get update && apt-get install -y \
     libpq-dev libzip-dev libpng-dev libonig-dev libxml2-dev \
-    zip unzip git curl \
+    zip unzip git curl dos2unix \
     && docker-php-ext-install pdo pdo_pgsql mbstring exif pcntl bcmath gd zip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -38,7 +38,7 @@ RUN npm run production
 RUN php artisan config:clear 2>/dev/null || true
 
 COPY start.sh /start.sh
-RUN chmod +x /start.sh
+RUN dos2unix /start.sh && chmod +x /start.sh
 
 EXPOSE 10000
 
