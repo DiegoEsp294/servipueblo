@@ -28,7 +28,7 @@ RUN npm ci
 COPY . .
 
 # Permisos antes de compilar
-RUN mkdir -p storage/logs storage/framework/sessions storage/framework/views storage/framework/cache \
+RUN mkdir -p storage/logs storage/framework/sessions storage/framework/views storage/framework/cache bootstrap/cache \
     && chmod -R 777 storage bootstrap/cache public
 
 # Compilar assets
