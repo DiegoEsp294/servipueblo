@@ -8,8 +8,9 @@ php artisan cache:clear
 # Crear enlace de storage
 php artisan storage:link 2>/dev/null || true
 
-# Migraciones
+# Migraciones y seeder del admin
 php artisan migrate --force
+php artisan db:seed --class=AdminUserSeeder --force
 
 # Cache de configuración/rutas/vistas
 php artisan optimize

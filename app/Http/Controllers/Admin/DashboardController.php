@@ -16,7 +16,7 @@ class DashboardController extends Controller
             'total_ratings'  => Rating::count(),
         ];
 
-        $latestWorkers = Worker::with('category')->latest()->limit(5)->get();
+        $latestWorkers = Worker::with('categories')->latest()->limit(5)->get();
 
         return view('admin.dashboard', compact('stats', 'latestWorkers'));
     }
