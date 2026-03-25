@@ -4,6 +4,8 @@ set -e
 # Limpiar cualquier cache de config viejo bakeado en la imagen
 php artisan config:clear
 php artisan cache:clear
+php artisan route:clear
+php artisan view:clear
 
 # Crear enlace de storage
 php artisan storage:link 2>/dev/null || true

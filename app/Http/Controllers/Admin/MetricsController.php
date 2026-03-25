@@ -9,7 +9,7 @@ class MetricsController extends Controller
 {
     public function index()
     {
-        $workers = \App\Models\Worker::with('category')
+        $workers = \App\Models\Worker::with('categories')
             ->withCount([
                 'events as views_total'     => fn($q) => $q->where('type', 'view'),
                 'events as views_month'     => fn($q) => $q->where('type', 'view')->where('created_at', '>=', now()->startOfMonth()),
