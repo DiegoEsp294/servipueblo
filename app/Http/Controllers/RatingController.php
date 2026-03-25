@@ -17,12 +17,24 @@ class RatingController extends Controller
             ])->with('error', 'Necesitás iniciar sesión para calificar.');
         }
 
+        $userId = auth()->id();
+
+        // Una sola calificación por usuario por trabajador
+        $existing = $worker->ratings()->where('user_id', $userId)->first();
+        if ($existing) {
+            return back()->with('error', 'Ya calificaste a este trabajador.');
+        }
+
         $worker->ratings()->create([
+            'user_id'       => $userId,
             'score'         => $request->score,
             'comment'       => $request->comment,
             'reviewer_name' => $request->reviewer_name ?: auth()->user()->name,
             'ip_address'    => $request->ip(),
         ]);
+
+        // Forzar recálculo (respaldo por si el model event falla)
+        $worker->recalculateRating();
 
         return back()->with('success', '¡Gracias por tu calificación!');
     }

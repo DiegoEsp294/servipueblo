@@ -9,7 +9,7 @@ class Rating extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['worker_id', 'score', 'comment', 'reviewer_name', 'ip_address'];
+    protected $fillable = ['worker_id', 'user_id', 'score', 'comment', 'reviewer_name', 'ip_address'];
 
     protected $casts = [
         'score' => 'integer',
