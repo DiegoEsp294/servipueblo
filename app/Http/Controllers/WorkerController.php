@@ -30,6 +30,10 @@ class WorkerController extends Controller
 
         $query = Worker::active()->with('categories')->orderByDesc('average_rating');
 
+        if ($request->filled('nombre')) {
+            $query->where('name', 'ilike', '%' . $request->nombre . '%');
+        }
+
         if ($request->filled('categoria')) {
             $query->whereHas('categories', fn($q) => $q->where('slug', $request->categoria));
         }

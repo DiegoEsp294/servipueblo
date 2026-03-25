@@ -15,6 +15,14 @@
       class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-6 flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:items-end">
 
     <div class="w-full sm:flex-1">
+        <label class="block text-xs font-medium text-gray-600 mb-1">🔍 Nombre</label>
+        <input type="text" name="nombre" value="{{ request('nombre') }}"
+               placeholder="Ej: Juan García"
+               autocomplete="off"
+               class="w-full border border-gray-300 rounded px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+    </div>
+
+    <div class="w-full sm:flex-1">
         <label class="block text-xs font-medium text-gray-600 mb-1">
             📍 Pueblo
             @if($pueblo)
@@ -50,7 +58,7 @@
                 class="flex-1 sm:flex-none bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium px-4 py-2.5 rounded transition-colors">
             Buscar
         </button>
-        @if($pueblo || request('categoria'))
+        @if($pueblo || request('categoria') || request('nombre'))
             <a href="{{ route('workers.index', ['limpiar' => 1]) }}"
                class="flex-1 sm:flex-none text-center bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium px-4 py-2.5 rounded transition-colors">
                 Limpiar

@@ -42,7 +42,7 @@
                         {{ $worker->name }}
                     </a>
                 </td>
-                <td class="py-2 text-gray-600">{{ $worker->category->name }}</td>
+                <td class="py-2 text-gray-600">{{ $worker->categories->pluck('name')->join(', ') ?: '—' }}</td>
                 <td class="py-2 text-gray-600">{{ $worker->town }}</td>
                 <td class="py-2">
                     <span class="px-2 py-0.5 rounded-full text-xs font-medium
