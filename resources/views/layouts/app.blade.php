@@ -29,6 +29,20 @@
 </head>
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
 
+    {{-- Loading overlay --}}
+    <div id="loading-overlay"
+         class="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900 bg-opacity-60 backdrop-blur-sm transition-opacity duration-300">
+        <div class="flex flex-col items-center gap-4">
+            {{-- Spinner doble aro --}}
+            <div class="relative w-16 h-16">
+                <div class="absolute inset-0 rounded-full border-4 border-brand-200 opacity-30"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-t-brand-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+                <div class="absolute inset-0 flex items-center justify-center text-2xl">🛠️</div>
+            </div>
+            <span class="text-white text-sm font-medium tracking-wide">Cargando...</span>
+        </div>
+    </div>
+
     {{-- Navbar --}}
     <header class="bg-white shadow-sm sticky top-0 z-40">
         <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -75,6 +89,48 @@
 
     <script src="{{ mix('js/app.js') }}"></script>
     @stack('scripts')
+
+    <script>
+    (function () {
+        var overlay = document.getElementById('loading-overlay');
+
+        function hideLoader() {
+            overlay.style.opacity = '0';
+            overlay.style.pointerEvents = 'none';
+        }
+
+        function showLoader() {
+            overlay.style.opacity = '1';
+            overlay.style.pointerEvents = 'all';
+        }
+
+        // Ocultar cuando la página termina de cargar
+        window.addEventListener('load', hideLoader);
+
+        // Por si acaso (fallback a 3s)
+        setTimeout(hideLoader, 3000);
+
+        // Mostrar en submit de formularios (excepto chat y búsquedas con method GET rápidas)
+        document.addEventListener('submit', function (e) {
+            var form = e.target;
+            // No bloquear el form del chat widget
+            if (form.id === 'chat-form') return;
+            showLoader();
+        });
+
+        // Mostrar en clicks de navegación (links internos)
+        document.addEventListener('click', function (e) {
+            var link = e.target.closest('a[href]');
+            if (!link) return;
+            var href = link.getAttribute('href');
+            // Ignorar: anclas, vacíos, externos, javascript:, mailto:, tel:
+            if (!href || href.startsWith('#') || href.startsWith('javascript')
+                || href.startsWith('mailto') || href.startsWith('tel')
+                || href.startsWith('http') || href.startsWith('//')) return;
+            showLoader();
+        });
+    })();
+    </script>
 
     {{-- Widget de IA --}}
     <div id="chat-widget" class="fixed bottom-5 right-4 z-50 flex flex-col items-end gap-3">

@@ -9,6 +9,19 @@
 </head>
 <body class="bg-gray-100 min-h-screen">
 
+    {{-- Loading overlay --}}
+    <div id="loading-overlay"
+         class="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900 bg-opacity-60 backdrop-blur-sm transition-opacity duration-300">
+        <div class="flex flex-col items-center gap-4">
+            <div class="relative w-16 h-16">
+                <div class="absolute inset-0 rounded-full border-4 border-brand-200 opacity-30"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-t-brand-500 border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+                <div class="absolute inset-0 flex items-center justify-center text-2xl">🛠️</div>
+            </div>
+            <span class="text-white text-sm font-medium tracking-wide">Cargando...</span>
+        </div>
+    </div>
+
     {{-- Top bar móvil --}}
     <header class="bg-gray-900 text-white flex items-center justify-between px-4 py-3 md:hidden sticky top-0 z-40">
         <span class="font-bold">🛠️ Admin</span>
@@ -114,5 +127,36 @@
         }
     </script>
     @stack('scripts')
+
+    <script>
+    (function () {
+        var overlay = document.getElementById('loading-overlay');
+
+        function hideLoader() {
+            overlay.style.opacity = '0';
+            overlay.style.pointerEvents = 'none';
+        }
+
+        function showLoader() {
+            overlay.style.opacity = '1';
+            overlay.style.pointerEvents = 'all';
+        }
+
+        window.addEventListener('load', hideLoader);
+        setTimeout(hideLoader, 3000);
+
+        document.addEventListener('submit', function () { showLoader(); });
+
+        document.addEventListener('click', function (e) {
+            var link = e.target.closest('a[href]');
+            if (!link) return;
+            var href = link.getAttribute('href');
+            if (!href || href.startsWith('#') || href.startsWith('javascript')
+                || href.startsWith('mailto') || href.startsWith('tel')
+                || href.startsWith('http') || href.startsWith('//')) return;
+            showLoader();
+        });
+    })();
+    </script>
 </body>
 </html>
