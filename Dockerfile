@@ -34,6 +34,9 @@ RUN mkdir -p storage/logs storage/framework/sessions storage/framework/views sto
 # Compilar assets
 RUN npm run production
 
+# Limpiar cache de config local que pudo haberse copiado
+RUN php artisan config:clear 2>/dev/null || true
+
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
