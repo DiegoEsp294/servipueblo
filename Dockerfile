@@ -27,12 +27,12 @@ RUN npm ci
 # Código fuente
 COPY . .
 
+# Permisos antes de compilar
+RUN mkdir -p storage/logs storage/framework/sessions storage/framework/views storage/framework/cache \
+    && chmod -R 777 storage bootstrap/cache public
+
 # Compilar assets
 RUN npm run production
-
-# Permisos
-RUN mkdir -p storage/logs storage/framework/sessions storage/framework/views storage/framework/cache \
-    && chmod -R 775 storage bootstrap/cache
 
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
