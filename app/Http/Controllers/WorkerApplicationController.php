@@ -18,6 +18,7 @@ class WorkerApplicationController extends Controller
             'name'        => 'required|string|max:100',
             'category_id' => 'required|exists:categories,id',
             'phone'       => 'required|string|max:20',
+            'email'       => 'nullable|email|max:150',
             'town'        => 'required|string|max:100',
             'description' => 'nullable|string|max:500',
         ]);
