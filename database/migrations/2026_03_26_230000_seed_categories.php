@@ -57,14 +57,15 @@ class SeedCategories extends Migration
             $order++;
             \DB::statement("
                 INSERT INTO categories (name, slug, icon, for_type, sort_order, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, NOW(), NOW())
-                ON CONFLICT (name) DO NOTHING
+                SELECT ?, ?, ?, ?, ?, NOW(), NOW()
+                WHERE NOT EXISTS (SELECT 1 FROM categories WHERE name = ?)
             ", [
                 $cat['name'],
                 \Illuminate\Support\Str::slug($cat['name']),
                 $cat['icon'],
                 $cat['for_type'],
                 $order,
+                $cat['name'],
             ]);
         }
     }
