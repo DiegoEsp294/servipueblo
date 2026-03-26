@@ -115,14 +115,12 @@ class Worker extends Model
 
     public function recalculateRating(): void
     {
-        $count           = $this->ratings()->count();
-        $avg             = $count ? ($this->ratings()->avg('score') ?? 0) : 0;
-        $recommendations = $this->ratings()->where('score', '>=', 4)->count();
-
-        $this->update([
-            'average_rating'        => round($avg, 2),
-            'ratings_count'         => $count,
-            'recommendations_count' => $recommendations,
-        ]);
+        \DB::statement('
+            UPDATE workers SET
+                ratings_count          = (SELECT COUNT(*)                    FROM ratings WHERE worker_id = ?),
+                recommendations_count  = (SELECT COUNT(*)                    FROM ratings WHERE worker_id = ? AND score >= 4),
+                average_rating         = (SELECT COALESCE(ROUND(AVG(score)::numeric, 2), 0) FROM ratings WHERE worker_id = ?)
+            WHERE id = ?
+        ', [$this->id, $this->id, $this->id, $this->id]);
     }
 }

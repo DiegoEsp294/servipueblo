@@ -49,7 +49,7 @@
             <div class="flex gap-2">
                 <a href="{{ route('workers.show', $worker->slug) }}"
                    class="text-xs text-brand-600 hover:underline">Ver perfil</a>
-                <x-whatsapp-button :url="$worker->whatsapp_url" size="sm" />
+                <x-whatsapp-button :url="route('workers.whatsapp', $worker->slug)" size="sm" />
             </div>
         </div>
     </div>
