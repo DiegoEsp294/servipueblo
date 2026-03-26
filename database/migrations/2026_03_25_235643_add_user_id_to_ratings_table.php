@@ -11,27 +11,38 @@ class AddUserIdToRatingsTable extends Migration
      *
      * @return void
      */
+    // No envolver en transacción para poder usar IF NOT EXISTS
+    public $withinTransaction = false;
+
     public function up()
     {
-        // Agregar columna si no existe
-        if (!Schema::hasColumn('ratings', 'user_id')) {
-            Schema::table('ratings', function (Blueprint $table) {
-                $table->unsignedBigInteger('user_id')->nullable()->after('worker_id');
-                $table->foreign('user_id')->references('id')->on('users')->nullOnDelete();
-            });
-        }
+        // Columna
+        \DB::statement('ALTER TABLE ratings ADD COLUMN IF NOT EXISTS user_id BIGINT NULL');
 
-        // Agregar unique si no existe
-        $exists = collect(\DB::select("
-            SELECT indexname FROM pg_indexes
-            WHERE tablename = 'ratings' AND indexname = 'ratings_worker_user_unique'
-        "))->isNotEmpty();
+        // Foreign key
+        \DB::statement('
+            DO $$ BEGIN
+                IF NOT EXISTS (
+                    SELECT 1 FROM pg_constraint
+                    WHERE conname = \'ratings_user_id_foreign\'
+                ) THEN
+                    ALTER TABLE ratings ADD CONSTRAINT ratings_user_id_foreign
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
+                END IF;
+            END $$;
+        ');
 
-        if (!$exists) {
-            Schema::table('ratings', function (Blueprint $table) {
-                $table->unique(['worker_id', 'user_id'], 'ratings_worker_user_unique');
-            });
-        }
+        // Unique
+        \DB::statement('
+            DO $$ BEGIN
+                IF NOT EXISTS (
+                    SELECT 1 FROM pg_indexes
+                    WHERE indexname = \'ratings_worker_user_unique\'
+                ) THEN
+                    CREATE UNIQUE INDEX ratings_worker_user_unique ON ratings(worker_id, user_id);
+                END IF;
+            END $$;
+        ');
     }
 
     public function down()
