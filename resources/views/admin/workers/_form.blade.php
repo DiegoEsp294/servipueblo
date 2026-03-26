@@ -123,7 +123,7 @@
 
     {{-- Fotos de trabajos --}}
     <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Fotos de trabajos realizados (máx. 2)</label>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Fotos de trabajos realizados (máx. 5)</label>
 
         @if(optional($worker)->photos && $worker->photos->count())
             <div class="flex flex-wrap gap-2 mb-3">
@@ -142,13 +142,13 @@
             <p class="text-xs text-gray-400 mb-2">Hover sobre una foto y tildala para eliminarla al guardar.</p>
         @endif
 
-        @php $slotsLeft = 2 - (optional($worker)->photos ? $worker->photos->count() : 0); @endphp
+        @php $slotsLeft = 5 - (optional($worker)->photos ? $worker->photos->count() : 0); @endphp
         @if($slotsLeft > 0)
             <input type="file" name="work_photos[]" accept="image/*" multiple
                    class="w-full text-sm text-gray-600">
-            <p class="text-xs text-gray-400 mt-0.5">Podés subir hasta {{ $slotsLeft }} foto(s) más · JPG o PNG · Máx. 2MB c/u</p>
+            <p class="text-xs text-gray-400 mt-0.5">Podés subir hasta {{ $slotsLeft }} foto(s) más · JPG o PNG · Máx. 10MB c/u</p>
         @else
-            <p class="text-xs text-gray-400">Ya tiene 2 fotos. Eliminá alguna para agregar nuevas.</p>
+            <p class="text-xs text-gray-400">Ya tiene 5 fotos. Eliminá alguna para agregar nuevas.</p>
         @endif
     </div>
 

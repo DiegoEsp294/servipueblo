@@ -138,7 +138,7 @@ class WorkerController extends Controller
     private function syncWorkPhotos($request, Worker $worker): void
     {
         $existing = $worker->photos()->count();
-        $slots    = 2 - $existing;
+        $slots    = 5 - $existing;
         if ($slots <= 0 || !$request->hasFile('work_photos')) return;
 
         foreach (array_slice($request->file('work_photos'), 0, $slots) as $i => $file) {
