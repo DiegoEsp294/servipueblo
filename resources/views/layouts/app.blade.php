@@ -85,6 +85,13 @@
         © {{ date('Y') }} ServiPueblo · Conectando pueblos con trabajadores
         <span class="mx-2">·</span>
         Soporte: <a href="mailto:servipueblosoporte@gmail.com" class="hover:text-brand-600">servipueblosoporte@gmail.com</a>
+        <span class="mx-2">·</span>
+        @guest
+            <a href="{{ route('login') }}" class="hover:text-gray-600">Acceso admin</a>
+        @else
+            <a href="{{ route('admin.dashboard') }}" class="hover:text-brand-600">Admin</a>
+            · <form method="POST" action="{{ route('logout') }}" class="inline"><button type="submit" class="hover:text-red-500">Salir</button>@csrf</form>
+        @endguest
     </footer>
 
     <script src="{{ mix('js/app.js') }}"></script>
@@ -123,10 +130,14 @@
             var link = e.target.closest('a[href]');
             if (!link) return;
             var href = link.getAttribute('href');
-            // Ignorar: anclas, vacíos, externos, javascript:, mailto:, tel:
             if (!href || href.startsWith('#') || href.startsWith('javascript')
-                || href.startsWith('mailto') || href.startsWith('tel')
-                || href.startsWith('http') || href.startsWith('//')) return;
+                || href.startsWith('mailto') || href.startsWith('tel')) return;
+            // Permitir URLs absolutas del mismo dominio, ignorar externas
+            if (href.startsWith('http') || href.startsWith('//')) {
+                try {
+                    if (new URL(href).hostname !== window.location.hostname) return;
+                } catch(e) { return; }
+            }
             showLoader();
         });
     })();

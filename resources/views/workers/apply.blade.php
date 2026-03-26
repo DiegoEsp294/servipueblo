@@ -60,15 +60,29 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Tu oficio *</label>
-                <select name="category_id" required
+                <label class="block text-sm font-medium text-gray-700 mb-1" id="category-label">Rubro *</label>
+
+                {{-- Categorías para trabajadores --}}
+                <select name="category_id" id="category-worker" required
                         class="w-full border border-gray-300 rounded px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 @error('category_id') border-red-400 @enderror">
                     <option value="">Seleccioná tu oficio</option>
-                    @foreach($categories as $cat)
+                    @foreach($workerCategories as $cat)
                         <option value="{{ $cat->id }}" {{ old('category_id') == $cat->id ? 'selected' : '' }}>
                             {{ $cat->icon }} {{ $cat->name }}
                         </option>
                     @endforeach
+                </select>
+
+                {{-- Categorías para emprendedores --}}
+                <select name="category_id" id="category-entrepreneur" disabled
+                        class="hidden w-full border border-gray-300 rounded px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    <option value="">Seleccioná el rubro</option>
+                    @foreach($entrepreneurCategories as $cat)
+                        <option value="{{ $cat->id }}" {{ old('category_id') == $cat->id ? 'selected' : '' }}>
+                            {{ $cat->icon }} {{ $cat->name }}
+                        </option>
+                    @endforeach
+                    <option value="">— Sin rubro específico —</option>
                 </select>
             </div>
 
@@ -113,5 +127,36 @@
         </form>
     </div>
 </div>
+
+@push('scripts')
+<script>
+(function () {
+    var radios = document.querySelectorAll('input[name="type"]');
+    var selWorker = document.getElementById('category-worker');
+    var selEntrepreneur = document.getElementById('category-entrepreneur');
+    var label = document.getElementById('category-label');
+
+    function switchCategory(type) {
+        if (type === 'entrepreneur') {
+            selWorker.classList.add('hidden'); selWorker.disabled = true; selWorker.required = false;
+            selEntrepreneur.classList.remove('hidden'); selEntrepreneur.disabled = false; selEntrepreneur.required = true;
+            label.textContent = 'Rubro del emprendimiento *';
+        } else {
+            selEntrepreneur.classList.add('hidden'); selEntrepreneur.disabled = true; selEntrepreneur.required = false;
+            selWorker.classList.remove('hidden'); selWorker.disabled = false; selWorker.required = true;
+            label.textContent = 'Tu oficio *';
+        }
+    }
+
+    radios.forEach(function (r) {
+        r.addEventListener('change', function () { switchCategory(this.value); });
+    });
+
+    // Estado inicial
+    var checked = document.querySelector('input[name="type"]:checked');
+    if (checked) switchCategory(checked.value);
+})();
+</script>
+@endpush
 
 @endsection

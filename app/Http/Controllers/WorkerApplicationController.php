@@ -9,7 +9,9 @@ class WorkerApplicationController extends Controller
     public function create()
     {
         $categories = \App\Models\Category::ordered()->get();
-        return view('workers.apply', compact('categories'));
+        $workerCategories       = $categories->whereIn('for_type', ['worker', 'all'])->values();
+        $entrepreneurCategories = $categories->whereIn('for_type', ['entrepreneur', 'all'])->values();
+        return view('workers.apply', compact('workerCategories', 'entrepreneurCategories'));
     }
 
     public function store(Request $request)
