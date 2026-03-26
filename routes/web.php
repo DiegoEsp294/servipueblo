@@ -76,6 +76,16 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
     Route::get('metrics', [Admin\MetricsController::class, 'index'])->name('metrics.index');
     Route::get('metrics/trabajador/{worker}', [Admin\MetricsController::class, 'worker'])->name('metrics.worker');
 
+    // ── TEMPORAL: borrar todos los trabajadores de prueba ────────────────────
+    Route::get('clear-test-workers', function () {
+        \DB::table('worker_events')->delete();
+        \DB::table('worker_photos')->delete();
+        \DB::table('ratings')->delete();
+        \DB::table('category_worker')->delete();
+        \DB::table('workers')->delete();
+        return response()->json(['ok' => true, 'msg' => 'Todos los trabajadores eliminados.']);
+    });
+
     // Diagnóstico storage
     Route::get('storage-test', function () {
         try {
