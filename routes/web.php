@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 
 // ── Rutas públicas ───────────────────────────────────────────────────────────
 
-Route::get('/ping', fn() => response()->json(['status' => 'ok', 'time' => now()]));
+Route::get('/ping', fn() => response('', 204));
 
 Route::get('/', [WorkerController::class, 'index'])->name('home');
 Route::get('/trabajadores', [WorkerController::class, 'index'])->name('workers.index');
