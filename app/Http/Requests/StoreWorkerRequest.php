@@ -24,7 +24,7 @@ class StoreWorkerRequest extends FormRequest
             'phone'           => ['required', 'string', 'max:20'],
             'email'           => ['nullable', 'email', 'max:150'],
             'town'           => ['required', 'string', 'max:100'],
-            'photo'          => ['nullable', 'image', 'max:2048'],
+            'photo'          => ['nullable', 'image', 'max:10240'],
             'is_active'      => ['nullable', 'boolean'],
         ];
     }
@@ -44,7 +44,7 @@ class StoreWorkerRequest extends FormRequest
             'phone.required'         => 'El teléfono es obligatorio.',
             'town.required'          => 'El pueblo es obligatorio.',
             'photo.image'            => 'El archivo debe ser una imagen.',
-            'photo.max'              => 'La imagen no debe superar 2MB.',
+            'photo.max'              => 'La imagen no debe superar 10MB.',
         ];
     }
 }

@@ -37,7 +37,12 @@ class WorkerController extends Controller
         $data['is_active'] = $request->boolean('is_active', true);
 
         if ($request->hasFile('photo')) {
-            $data['photo_path'] = $request->file('photo')->store('workers/photos');
+            try {
+                $data['photo_path'] = $request->file('photo')->store('workers/photos');
+            } catch (\Exception $e) {
+                \Log::error('Photo upload failed: ' . $e->getMessage());
+                return back()->withInput()->withErrors(['photo' => 'No se pudo subir la foto: ' . $e->getMessage()]);
+            }
         }
 
         unset($data['photo'], $data['category_ids']);
@@ -62,10 +67,15 @@ class WorkerController extends Controller
         $data['is_active'] = $request->boolean('is_active', true);
 
         if ($request->hasFile('photo')) {
-            if ($worker->photo_path) {
-                Storage::delete($worker->photo_path);
+            try {
+                if ($worker->photo_path) {
+                    Storage::delete($worker->photo_path);
+                }
+                $data['photo_path'] = $request->file('photo')->store('workers/photos');
+            } catch (\Exception $e) {
+                \Log::error('Photo upload failed: ' . $e->getMessage());
+                return back()->withInput()->withErrors(['photo' => 'No se pudo subir la foto: ' . $e->getMessage()]);
             }
-            $data['photo_path'] = $request->file('photo')->store('workers/photos');
         }
 
         unset($data['photo'], $data['category_ids']);

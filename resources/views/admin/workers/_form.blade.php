@@ -117,7 +117,7 @@
         @endif
         <input type="file" name="photo" accept="image/*"
                class="w-full text-sm text-gray-600 @error('photo') text-red-500 @enderror">
-        <p class="text-xs text-gray-400 mt-0.5">JPG, PNG o GIF · Máximo 2MB</p>
+        <p class="text-xs text-gray-400 mt-0.5">JPG, PNG o GIF · Máximo 10MB</p>
         @error('photo')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
     </div>
 
