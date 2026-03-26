@@ -8,6 +8,8 @@ class SeedCategories extends Migration
 
     public function up()
     {
+        try { \DB::statement('SELECT 1'); } catch (\Exception $e) { return; }
+
         $categories = [
             // ── Oficios (trabajadores) ────────────────────────────────────────
             ['icon' => '⚡', 'name' => 'Electricista',           'for_type' => 'worker'],
