@@ -22,15 +22,16 @@ class WorkerController extends Controller
         } elseif ($tipo === 'entrepreneur') {
             $categoriesQuery->whereIn('for_type', ['entrepreneur', 'all']);
         }
-        $categories = $categoriesQuery->get()->each(function ($cat) use ($tipo) {
-            $cat->workers_count = $cat->workers()->active()
-                ->when($tipo, fn($q) => $q->where('type', $tipo))
-                ->count();
-        });
+        $categories = $categoriesQuery->withCount(['workers as workers_count' => function ($q) use ($tipo) {
+            $q->active()->when($tipo, fn($q2) => $q2->where('type', $tipo));
+        }])->get();
 
-        $towns = Worker::active()
-            ->when($tipo, fn($q) => $q->where('type', $tipo))
-            ->distinct()->orderBy('town')->pluck('town');
+        $townsCacheKey = 'towns_list_' . ($tipo ?? 'all');
+        $towns = Cache::remember($townsCacheKey, 300, fn() =>
+            Worker::active()
+                ->when($tipo, fn($q) => $q->where('type', $tipo))
+                ->distinct()->orderBy('town')->pluck('town')
+        );
 
         // Pueblo desde GET, cookie, o vacío
         $pueblo = $request->filled('pueblo')
