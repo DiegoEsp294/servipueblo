@@ -14,8 +14,9 @@ php artisan storage:link 2>/dev/null || true
 php artisan migrate --force
 php artisan db:seed --class=AdminUserSeeder --force
 
-# Cache de configuración/rutas/vistas
-php artisan optimize
+# Cache de configuración y vistas (route:cache se omite porque hay rutas con closures)
+php artisan config:cache
+php artisan view:cache
 
 # Iniciar servidor
 exec php artisan serve --host=0.0.0.0 --port=${PORT:-10000}
