@@ -28,20 +28,24 @@
 <meta property="profile:first_name" content="{{ explode(' ', $worker->name)[0] }}">
 <meta property="profile:last_name" content="{{ implode(' ', array_slice(explode(' ', $worker->name), 1)) }}">
 <meta name="keywords" content="{{ $categoryNames }}, {{ $worker->town }}, servicios, trabajadores, ServiPueblo">
-<link rel="canonical" href="{{ route('workers.show', $worker->slug) }}">
+<link rel="canonical" href="{{ $worker->profile_url }}">
 
 {{-- JSON-LD para Google --}}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Person",
+  "@type": "{{ $worker->is_entrepreneur ? 'LocalBusiness' : 'Person' }}",
   "name": "{{ $worker->name }}",
+  @if($worker->is_entrepreneur)
+  "description": "{{ addslashes($ogDescription) }}",
+  @else
   "jobTitle": "{{ $categoryNames }}",
+  @endif
   "address": {
     "@type": "PostalAddress",
     "addressLocality": "{{ $worker->town }}"
   },
-  "url": "{{ route('workers.show', $worker->slug) }}",
+  "url": "{{ $worker->profile_url }}",
   "image": "{{ $ogImage }}",
   "description": "{{ addslashes($ogDescription) }}",
   "sameAs": ["{{ $worker->whatsapp_url }}"]

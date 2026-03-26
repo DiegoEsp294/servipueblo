@@ -18,14 +18,16 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:80', 'unique:categories,name'],
-            'icon' => ['nullable', 'string', 'max:60'],
+            'name'     => ['required', 'string', 'max:80', 'unique:categories,name'],
+            'icon'     => ['nullable', 'string', 'max:60'],
+            'for_type' => ['nullable', 'in:worker,entrepreneur,all'],
         ]);
 
         Category::create([
             'name'       => $request->name,
             'slug'       => Str::slug($request->name),
             'icon'       => $request->icon,
+            'for_type'   => $request->input('for_type', 'worker'),
             'sort_order' => Category::max('sort_order') + 1,
         ]);
 

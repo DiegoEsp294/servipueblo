@@ -15,6 +15,7 @@ class WorkerApplicationController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
+            'type'        => 'nullable|in:worker,entrepreneur',
             'name'        => 'required|string|max:100',
             'category_id' => 'required|exists:categories,id',
             'phone'       => 'required|string|max:20',

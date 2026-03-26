@@ -2,6 +2,22 @@
 
 <div class="grid gap-4">
 
+    {{-- Tipo --}}
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de perfil *</label>
+        <div class="grid grid-cols-2 gap-2">
+            @foreach(['worker' => ['🔧', 'Trabajador / Oficio'], 'entrepreneur' => ['🏪', 'Emprendimiento']] as $val => [$icon, $lbl])
+                @php $checked = old('type', optional($worker)->type ?? 'worker') === $val; @endphp
+                <label class="flex items-center gap-2 border rounded-lg px-3 py-2.5 cursor-pointer transition-colors
+                              {{ $checked ? 'border-brand-400 bg-brand-50' : 'border-gray-200 hover:border-gray-300' }}">
+                    <input type="radio" name="type" value="{{ $val }}" {{ $checked ? 'checked' : '' }}
+                           class="text-brand-600 focus:ring-brand-500">
+                    <span class="text-sm">{{ $icon }} {{ $lbl }}</span>
+                </label>
+            @endforeach
+        </div>
+    </div>
+
     {{-- Nombre --}}
     <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Nombre completo *</label>

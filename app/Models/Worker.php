@@ -20,9 +20,13 @@ class Worker extends Model
         'unavailable' => ['label' => 'No disponible',           'icon' => '🔴', 'color' => 'red'],
     ];
 
+    const TYPE_WORKER       = 'worker';
+    const TYPE_ENTREPRENEUR = 'entrepreneur';
+
     protected $fillable = [
         'name',
         'slug',
+        'type',
         'description',
         'rate_info',
         'years_experience',
@@ -94,6 +98,25 @@ class Worker extends Model
         }
         $phone = ltrim($phone, '+');
         return 'https://wa.me/' . $phone;
+    }
+
+    public function getIsEntrepreneurAttribute(): bool
+    {
+        return $this->type === self::TYPE_ENTREPRENEUR;
+    }
+
+    public function getProfileUrlAttribute(): string
+    {
+        return $this->is_entrepreneur
+            ? route('entrepreneurs.show', $this->slug)
+            : route('workers.show', $this->slug);
+    }
+
+    public function getWhatsappTrackUrlAttribute(): string
+    {
+        return $this->is_entrepreneur
+            ? route('entrepreneurs.whatsapp', $this->slug)
+            : route('workers.whatsapp', $this->slug);
     }
 
     public function getPhotoUrlAttribute(): string

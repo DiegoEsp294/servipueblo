@@ -16,6 +16,7 @@ class StoreWorkerRequest extends FormRequest
         return [
             'category_ids'    => ['required', 'array', 'min:1', 'max:5'],
             'category_ids.*'  => ['required', 'integer', 'exists:categories,id'],
+            'type'            => ['nullable', 'in:worker,entrepreneur'],
             'name'            => ['required', 'string', 'max:120'],
             'description'     => ['nullable', 'string', 'max:500'],
             'rate_info'       => ['nullable', 'string', 'max:100'],

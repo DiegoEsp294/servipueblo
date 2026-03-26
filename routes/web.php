@@ -20,6 +20,10 @@ Route::get('/trabajadores', [WorkerController::class, 'index'])->name('workers.i
 Route::get('/trabajadores/{worker:slug}', [WorkerController::class, 'show'])->name('workers.show');
 Route::get('/trabajadores/{worker:slug}/whatsapp', [WorkerController::class, 'trackWhatsapp'])->name('workers.whatsapp');
 Route::post('/trabajadores/{worker:slug}/compartir', [WorkerController::class, 'trackShare'])->name('workers.share');
+
+Route::get('/emprendimientos/{worker:slug}', [WorkerController::class, 'show'])->name('entrepreneurs.show');
+Route::get('/emprendimientos/{worker:slug}/whatsapp', [WorkerController::class, 'trackWhatsapp'])->name('entrepreneurs.whatsapp');
+Route::post('/emprendimientos/{worker:slug}/compartir', [WorkerController::class, 'trackShare'])->name('entrepreneurs.share');
 Route::post('/chat', [AiChatController::class, 'chat'])->name('ai.chat')->middleware('throttle:20,60');
 Route::get('/categoria/{category:slug}', [CategoryController::class, 'show'])->name('categories.show');
 

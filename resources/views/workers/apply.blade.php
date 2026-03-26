@@ -33,6 +33,25 @@
         <form method="POST" action="/registrate-como-trabajador" class="grid gap-4">
             @csrf
 
+            {{-- Tipo --}}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">¿Qué tipo de perfil querés crear? *</label>
+                <div class="grid grid-cols-2 gap-2">
+                    @foreach(['worker' => ['🔧', 'Trabajador / Oficio', 'Plomero, electricista...'], 'entrepreneur' => ['🏪', 'Emprendimiento', 'Tienda, productos, servicios...']] as $val => [$icon, $lbl, $hint])
+                        @php $checked = old('type', 'worker') === $val; @endphp
+                        <label class="flex flex-col gap-0.5 border rounded-lg px-3 py-2.5 cursor-pointer transition-colors
+                                      {{ $checked ? 'border-brand-400 bg-brand-50' : 'border-gray-200 hover:border-gray-300' }}">
+                            <span class="flex items-center gap-2">
+                                <input type="radio" name="type" value="{{ $val }}" {{ $checked ? 'checked' : '' }}
+                                       class="text-brand-600 focus:ring-brand-500">
+                                <span class="text-sm font-medium">{{ $icon }} {{ $lbl }}</span>
+                            </span>
+                            <span class="text-xs text-gray-400 pl-5">{{ $hint }}</span>
+                        </label>
+                    @endforeach
+                </div>
+            </div>
+
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Tu nombre completo *</label>
                 <input type="text" name="name" value="{{ old('name') }}" required

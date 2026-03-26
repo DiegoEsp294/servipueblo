@@ -14,53 +14,72 @@ class WorkerController extends Controller
 {
     public function index(Request $request)
     {
-        $categories = Category::ordered()->get()->each(function ($cat) {
-            $cat->workers_count = $cat->workers()->active()->count();
+        $tipo = $request->input('tipo'); // 'worker', 'entrepreneur', o null = todos
+
+        $categoriesQuery = Category::ordered();
+        if ($tipo === 'worker') {
+            $categoriesQuery->whereIn('for_type', ['worker', 'all']);
+        } elseif ($tipo === 'entrepreneur') {
+            $categoriesQuery->whereIn('for_type', ['entrepreneur', 'all']);
+        }
+        $categories = $categoriesQuery->get()->each(function ($cat) use ($tipo) {
+            $cat->workers_count = $cat->workers()->active()
+                ->when($tipo, fn($q) => $q->where('type', $tipo))
+                ->count();
         });
 
-        $towns = Worker::active()->distinct()->orderBy('town')->pluck('town');
+        $towns = Worker::active()
+            ->when($tipo, fn($q) => $q->where('type', $tipo))
+            ->distinct()->orderBy('town')->pluck('town');
 
         // Pueblo desde GET, cookie, o vacío
         $pueblo = $request->filled('pueblo')
             ? $request->pueblo
             : ($request->hasCookie('sp_pueblo') ? $request->cookie('sp_pueblo') : '');
 
-        // "Limpiar" limpia también la cookie
         $clearCookie = $request->has('limpiar');
-        if ($clearCookie) {
-            $pueblo = '';
-        }
+        if ($clearCookie) $pueblo = '';
 
         $query = Worker::active()->with('categories')->orderByDesc('average_rating');
 
+        if ($tipo) {
+            $query->where('type', $tipo);
+        }
         if ($request->filled('nombre')) {
             $query->where('name', 'ilike', '%' . $request->nombre . '%');
         }
-
         if ($request->filled('categoria')) {
             $query->whereHas('categories', fn($q) => $q->where('slug', $request->categoria));
         }
-
         if ($pueblo) {
             $query->where('town', 'ilike', '%' . $pueblo . '%');
         }
 
         $workers = $query->paginate(12)->withQueryString();
 
-        $response = response()->view('workers.index', compact('workers', 'categories', 'towns', 'pueblo'));
+        $response = response()->view('workers.index', compact('workers', 'categories', 'towns', 'pueblo', 'tipo'));
 
         if ($clearCookie) {
             $response->withCookie(cookie()->forget('sp_pueblo'));
         } elseif ($pueblo) {
-            $response->withCookie(cookie('sp_pueblo', $pueblo, 60 * 24 * 30)); // 30 días
+            $response->withCookie(cookie('sp_pueblo', $pueblo, 60 * 24 * 30));
         }
 
         return $response;
     }
 
-    public function show(Worker $worker)
+    public function show(Worker $worker, Request $request)
     {
         abort_unless($worker->is_active, 404);
+
+        // Redirigir si la URL no corresponde al tipo
+        $isEntrepreneurRoute = $request->routeIs('entrepreneurs.*');
+        if ($isEntrepreneurRoute && !$worker->is_entrepreneur) {
+            return redirect($worker->profile_url, 301);
+        }
+        if (!$isEntrepreneurRoute && $worker->is_entrepreneur) {
+            return redirect($worker->profile_url, 301);
+        }
 
         $worker->load(['categories', 'ratings' => fn($q) => $q->latest()->limit(10), 'photos']);
 

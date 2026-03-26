@@ -1,4 +1,4 @@
-@props(['worker'])
+@props(['worker', 'showType' => false])
 
 <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 flex gap-4 hover:shadow-md transition-shadow">
     {{-- Foto --}}
@@ -10,7 +10,17 @@
 
     {{-- Info --}}
     <div class="flex-1 min-w-0">
-        <h3 class="font-semibold text-gray-900 truncate">{{ $worker->name }}</h3>
+        <div class="flex items-start justify-between gap-2">
+            <h3 class="font-semibold text-gray-900 truncate">{{ $worker->name }}</h3>
+            @if($showType)
+                <span class="shrink-0 text-xs px-2 py-0.5 rounded-full border
+                    {{ $worker->is_entrepreneur
+                        ? 'bg-purple-50 text-purple-600 border-purple-200'
+                        : 'bg-blue-50 text-blue-600 border-blue-200' }}">
+                    {{ $worker->is_entrepreneur ? '🏪 Emprendimiento' : '🔧 Oficio' }}
+                </span>
+            @endif
+        </div>
         <div class="flex flex-wrap gap-1 mt-0.5">
             @foreach($worker->categories as $cat)
                 <span class="text-xs {{ $loop->first ? 'text-brand-600 font-medium' : 'text-gray-400' }}">
@@ -24,13 +34,15 @@
             @else
                 <span class="text-gray-300">Sin calificaciones</span>
             @endif
-            @if($worker->years_experience)
+            @if($worker->years_experience && !$worker->is_entrepreneur)
                 <span class="text-gray-400">🗓️ {{ $worker->years_experience }} años exp.</span>
             @endif
         </div>
 
         @if($worker->rate_info)
-            <span class="inline-block text-xs text-green-700 bg-green-50 border border-green-200 rounded-full px-2 py-0.5 mt-1">💰 {{ $worker->rate_info }}</span>
+            <span class="inline-block text-xs text-green-700 bg-green-50 border border-green-200 rounded-full px-2 py-0.5 mt-1">
+                💰 {{ $worker->rate_info }}
+            </span>
         @endif
         @if($worker->description)
             <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ $worker->description }}</p>
@@ -47,9 +59,9 @@
                 @endif
             </div>
             <div class="flex gap-2">
-                <a href="{{ route('workers.show', $worker->slug) }}"
+                <a href="{{ $worker->profile_url }}"
                    class="text-xs text-brand-600 hover:underline">Ver perfil</a>
-                <x-whatsapp-button :url="route('workers.whatsapp', $worker->slug)" size="sm" />
+                <x-whatsapp-button :url="$worker->whatsapp_track_url" size="sm" />
             </div>
         </div>
     </div>
