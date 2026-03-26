@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\WorkerContactNotification;
 use App\Models\Category;
 use App\Models\Worker;
 use App\Models\WorkerEvent;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Mail;
 
 class WorkerController extends Controller
 {
@@ -70,6 +73,20 @@ class WorkerController extends Controller
     {
         abort_unless($worker->is_active, 404);
         WorkerEvent::record($worker, WorkerEvent::TYPE_WHATSAPP, 10);
+
+        // Notificar al trabajador (máx 1 email por hora por trabajador)
+        if ($worker->email) {
+            $cacheKey = 'worker_contact_notif_' . $worker->id;
+            if (!Cache::has($cacheKey)) {
+                Cache::put($cacheKey, true, now()->addHour());
+                try {
+                    Mail::to($worker->email)->send(new WorkerContactNotification($worker));
+                } catch (\Exception $e) {
+                    // No interrumpir el redirect si falla el mail
+                }
+            }
+        }
+
         return redirect($worker->whatsapp_url);
     }
 

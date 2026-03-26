@@ -54,6 +54,16 @@
                       placeholder="Describe brevemente los servicios que ofrece..."
                       class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none">{{ old('description', optional($worker)->description) }}</textarea>
         </div>
+        <div class="flex flex-col gap-3">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Tarifa aproximada</label>
+                <input type="text" name="rate_info"
+                       value="{{ old('rate_info', optional($worker)->rate_info) }}"
+                       placeholder="Ej: $5.000–$8.000/hora"
+                       maxlength="100"
+                       class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                <p class="text-xs text-gray-400 mt-0.5">Opcional · visible en el perfil</p>
+            </div>
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Años de experiencia</label>
             <input type="number" name="years_experience"
@@ -63,9 +73,11 @@
             <p class="text-xs text-gray-400 mt-0.5">Opcional · 1 a 60</p>
             @error('years_experience')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
         </div>
+        </div>
     </div>
 
-    {{-- Teléfono --}}
+    {{-- Teléfono + Email (en fila) --}}
+    <div class="grid sm:grid-cols-2 gap-4">
     <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono WhatsApp *</label>
         <input type="text" name="phone" value="{{ old('phone', optional($worker)->phone) }}" required
@@ -73,6 +85,14 @@
                class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 @error('phone') border-red-400 @enderror">
         <p class="text-xs text-gray-400 mt-0.5">Incluye código de país. Ej: +521234567890</p>
         @error('phone')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Email de notificaciones</label>
+        <input type="email" name="email" value="{{ old('email', optional($worker)->email) }}"
+               placeholder="juan@ejemplo.com"
+               class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+        <p class="text-xs text-gray-400 mt-0.5">Recibe aviso cuando alguien lo contacta</p>
+    </div>
     </div>
 
     {{-- Pueblo --}}

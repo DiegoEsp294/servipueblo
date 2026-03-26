@@ -29,6 +29,9 @@
             @endif
         </div>
 
+        @if($worker->rate_info)
+            <span class="inline-block text-xs text-green-700 bg-green-50 border border-green-200 rounded-full px-2 py-0.5 mt-1">💰 {{ $worker->rate_info }}</span>
+        @endif
         @if($worker->description)
             <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ $worker->description }}</p>
         @endif
