@@ -39,9 +39,9 @@ class WorkerController extends Controller
         if ($request->hasFile('photo')) {
             try {
                 $data['photo_path'] = $request->file('photo')->store('workers/photos');
-            } catch (\Exception $e) {
-                \Log::error('Photo upload failed: ' . $e->getMessage());
-                return back()->withInput()->withErrors(['photo' => 'No se pudo subir la foto: ' . $e->getMessage()]);
+            } catch (\Throwable $e) {
+                \Log::error('Photo upload failed (store): ' . $e->getMessage());
+                return back()->withInput()->withErrors(['photo' => 'No se pudo subir la foto al storage: ' . $e->getMessage()]);
             }
         }
 
@@ -72,9 +72,9 @@ class WorkerController extends Controller
                     Storage::delete($worker->photo_path);
                 }
                 $data['photo_path'] = $request->file('photo')->store('workers/photos');
-            } catch (\Exception $e) {
-                \Log::error('Photo upload failed: ' . $e->getMessage());
-                return back()->withInput()->withErrors(['photo' => 'No se pudo subir la foto: ' . $e->getMessage()]);
+            } catch (\Throwable $e) {
+                \Log::error('Photo upload failed (update): ' . $e->getMessage());
+                return back()->withInput()->withErrors(['photo' => 'No se pudo subir la foto al storage: ' . $e->getMessage()]);
             }
         }
 
@@ -88,12 +88,19 @@ class WorkerController extends Controller
         if ($deleteIds) {
             $toDelete = WorkerPhoto::whereIn('id', $deleteIds)->where('worker_id', $worker->id)->get();
             foreach ($toDelete as $photo) {
-                Storage::delete($photo->path);
+                try { Storage::delete($photo->path); } catch (\Throwable $e) { \Log::warning('Could not delete work photo: ' . $e->getMessage()); }
                 $photo->delete();
             }
         }
 
-        $this->syncWorkPhotos(request(), $worker);
+        try {
+            $this->syncWorkPhotos(request(), $worker);
+        } catch (\Throwable $e) {
+            \Log::error('Work photos upload failed: ' . $e->getMessage());
+            return redirect()->route('admin.workers.index')
+                ->with('success', 'Trabajador actualizado correctamente.')
+                ->with('warning', 'No se pudieron subir las fotos de trabajos: ' . $e->getMessage());
+        }
 
         return redirect()->route('admin.workers.index')->with('success', 'Trabajador actualizado correctamente.');
     }

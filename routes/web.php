@@ -71,5 +71,18 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
     // Métricas
     Route::get('metrics', [Admin\MetricsController::class, 'index'])->name('metrics.index');
     Route::get('metrics/trabajador/{worker}', [Admin\MetricsController::class, 'worker'])->name('metrics.worker');
+
+    // Diagnóstico storage
+    Route::get('storage-test', function () {
+        try {
+            $disk = config('filesystems.default');
+            \Storage::put('_test.txt', 'ok');
+            $url  = \Storage::url('_test.txt');
+            \Storage::delete('_test.txt');
+            return response()->json(['disk' => $disk, 'status' => 'ok', 'url' => $url]);
+        } catch (\Throwable $e) {
+            return response()->json(['disk' => config('filesystems.default'), 'status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    })->name('admin.storage-test');
 });
 
