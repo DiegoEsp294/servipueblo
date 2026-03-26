@@ -37,7 +37,7 @@ class WorkerController extends Controller
         $data['is_active'] = $request->boolean('is_active', true);
 
         if ($request->hasFile('photo')) {
-            $data['photo_path'] = $request->file('photo')->store('workers/photos', 'public');
+            $data['photo_path'] = $request->file('photo')->store('workers/photos');
         }
 
         unset($data['photo'], $data['category_ids']);
@@ -63,9 +63,9 @@ class WorkerController extends Controller
 
         if ($request->hasFile('photo')) {
             if ($worker->photo_path) {
-                Storage::disk('public')->delete($worker->photo_path);
+                Storage::delete($worker->photo_path);
             }
-            $data['photo_path'] = $request->file('photo')->store('workers/photos', 'public');
+            $data['photo_path'] = $request->file('photo')->store('workers/photos');
         }
 
         unset($data['photo'], $data['category_ids']);
@@ -78,7 +78,7 @@ class WorkerController extends Controller
         if ($deleteIds) {
             $toDelete = WorkerPhoto::whereIn('id', $deleteIds)->where('worker_id', $worker->id)->get();
             foreach ($toDelete as $photo) {
-                Storage::disk('public')->delete($photo->path);
+                Storage::delete($photo->path);
                 $photo->delete();
             }
         }
@@ -97,7 +97,7 @@ class WorkerController extends Controller
     public function destroy(Worker $worker)
     {
         if ($worker->photo_path) {
-            Storage::disk('public')->delete($worker->photo_path);
+            Storage::delete($worker->photo_path);
         }
         $worker->delete();
 
@@ -125,7 +125,7 @@ class WorkerController extends Controller
         if ($slots <= 0 || !$request->hasFile('work_photos')) return;
 
         foreach (array_slice($request->file('work_photos'), 0, $slots) as $i => $file) {
-            $path = $file->store('workers/work-photos', 'public');
+            $path = $file->store('workers/work-photos');
             WorkerPhoto::create([
                 'worker_id' => $worker->id,
                 'path'      => $path,
