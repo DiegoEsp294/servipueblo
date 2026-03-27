@@ -1,2 +1,10 @@
 User-agent: *
-Disallow:
+Allow: /
+
+Disallow: /admin
+Disallow: /mi-perfil
+Disallow: /terminos
+Disallow: /login
+Disallow: /verificar
+
+Sitemap: https://servipueblo.onrender.com/sitemap.xml

@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 // ── Rutas públicas ───────────────────────────────────────────────────────────
 
 Route::get('/ping', fn() => response('', 204));
+Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index']);
 
 Route::get('/', [WorkerController::class, 'index'])->name('home');
 Route::get('/trabajadores', [WorkerController::class, 'index'])->name('workers.index');
