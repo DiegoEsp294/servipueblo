@@ -123,8 +123,12 @@
         // Ocultar cuando la página termina de cargar
         window.addEventListener('load', hideLoader);
 
-        // Por si acaso (fallback a 3s)
-        setTimeout(hideLoader, 3000);
+        // Fallback: ocultar si después de 8s sigue visible
+        setTimeout(hideLoader, 8000);
+        // Ocultar también si el usuario vuelve a la pestaña (visibilitychange)
+        document.addEventListener('visibilitychange', function () {
+            if (!document.hidden) hideLoader();
+        });
 
         // Mostrar en submit de formularios (excepto chat y búsquedas con method GET rápidas)
         document.addEventListener('submit', function (e) {
@@ -134,10 +138,12 @@
             showLoader();
         });
 
-        // Mostrar en clicks de navegación (links internos)
+        // Mostrar en clicks de navegación (links internos, misma pestaña)
         document.addEventListener('click', function (e) {
             var link = e.target.closest('a[href]');
             if (!link) return;
+            // No mostrar si abre en nueva pestaña
+            if (link.target === '_blank' || e.ctrlKey || e.metaKey || e.shiftKey || e.which === 2) return;
             var href = link.getAttribute('href');
             if (!href || href.startsWith('#') || href.startsWith('javascript')
                 || href.startsWith('mailto') || href.startsWith('tel')) return;
