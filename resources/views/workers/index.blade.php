@@ -121,11 +121,13 @@
 {{-- Resultados --}}
 @php
     $total = $workers->total();
-    $label = match($tipo) {
-        'worker'       => $total === 1 ? 'trabajador encontrado' : 'trabajadores encontrados',
-        'entrepreneur' => $total === 1 ? 'emprendimiento encontrado' : 'emprendimientos encontrados',
-        default        => $total === 1 ? 'resultado encontrado' : 'resultados encontrados',
-    };
+    if ($tipo === 'worker') {
+        $label = $total === 1 ? 'trabajador encontrado' : 'trabajadores encontrados';
+    } elseif ($tipo === 'entrepreneur') {
+        $label = $total === 1 ? 'emprendimiento encontrado' : 'emprendimientos encontrados';
+    } else {
+        $label = $total === 1 ? 'resultado encontrado' : 'resultados encontrados';
+    }
 @endphp
 <div class="mb-3 text-sm text-gray-500">
     {{ $total }} {{ $label }}

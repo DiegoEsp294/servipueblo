@@ -49,11 +49,20 @@
             <a href="{{ route('home') }}" class="text-xl font-bold text-brand-600">
                 🛠️ ServiPueblo
             </a>
-            <nav class="flex gap-4 text-sm text-gray-600">
+            <nav class="flex gap-4 text-sm text-gray-600 items-center">
                 <a href="{{ route('workers.index') }}" class="hover:text-brand-600">Trabajadores</a>
                 <a href="{{ route('workers.apply') }}" class="hover:text-brand-600">Registrate</a>
                 @auth
-                    <a href="{{ route('admin.dashboard') }}" class="hover:text-brand-600">Admin</a>
+                    @if(auth()->user()->isAdmin())
+                        <a href="{{ route('admin.dashboard') }}" class="hover:text-brand-600">Admin</a>
+                    @else
+                        <a href="{{ route('worker.profile.edit') }}" class="hover:text-brand-600">Mi perfil</a>
+                    @endif
+                @else
+                    <a href="{{ route('login') }}"
+                       class="text-brand-600 border border-brand-300 hover:bg-brand-50 rounded-full px-3 py-1 transition-colors">
+                        Ingresar
+                    </a>
                 @endauth
             </nav>
         </div>

@@ -48,6 +48,16 @@
             <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ $worker->description }}</p>
         @endif
 
+        @if($worker->relationLoaded('tags') && $worker->tags->isNotEmpty())
+            <div class="flex flex-wrap gap-1 mt-2">
+                @foreach($worker->tags->take(4) as $tag)
+                    <span class="text-xs px-2 py-0.5 rounded-full bg-gray-50 border border-gray-200 text-gray-500">
+                        {{ $tag->icon }} {{ $tag->name }}
+                    </span>
+                @endforeach
+            </div>
+        @endif
+
         <div class="flex items-center justify-between mt-3">
             <div class="flex items-center gap-2">
                 <span class="text-xs text-gray-400">📍 {{ $worker->town }}</span>

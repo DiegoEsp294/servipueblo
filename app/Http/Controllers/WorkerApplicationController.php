@@ -11,7 +11,8 @@ class WorkerApplicationController extends Controller
         $categories = \App\Models\Category::ordered()->get();
         $workerCategories       = $categories->whereIn('for_type', ['worker', 'all'])->values();
         $entrepreneurCategories = $categories->whereIn('for_type', ['entrepreneur', 'all'])->values();
-        return view('workers.apply', compact('workerCategories', 'entrepreneurCategories'));
+        $tagsGrouped = \App\Models\Tag::allGrouped();
+        return view('workers.apply', compact('workerCategories', 'entrepreneurCategories', 'tagsGrouped'));
     }
 
     public function store(Request $request)
@@ -24,14 +25,23 @@ class WorkerApplicationController extends Controller
             'email'       => 'nullable|email|max:150',
             'town'        => 'required|string|max:100',
             'description' => 'nullable|string|max:500',
+            'tags'        => 'nullable|array|max:6',
+            'tags.*'      => 'integer|exists:tags,id',
         ]);
+
+        $tagIds = $data['tags'] ?? [];
+        unset($data['tags']);
 
         $slug = \Illuminate\Support\Str::slug($data['name']);
         $count = \App\Models\Worker::where('slug', 'like', $slug . '%')->count();
         $data['slug']      = $count ? $slug . '-' . ($count + 1) : $slug;
         $data['is_active'] = false;
 
-        \App\Models\Worker::create($data);
+        $worker = \App\Models\Worker::create($data);
+
+        if ($tagIds) {
+            $worker->tags()->sync($tagIds);
+        }
 
         return redirect()->route('workers.apply')->with('success',
             '¡Gracias! Tu solicitud fue enviada. El equipo de ServiPueblo la revisará y te contactará pronto.'

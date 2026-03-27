@@ -7,6 +7,8 @@ use App\Http\Controllers\RatingController;
 use App\Http\Controllers\SocialiteController;
 use App\Http\Controllers\WorkerController;
 use App\Http\Controllers\WorkerApplicationController;
+use App\Http\Controllers\WorkerProfileController;
+use App\Http\Controllers\TermsController;
 use App\Http\Controllers\Admin;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -53,15 +55,34 @@ Route::post('/verificar/cerrar', [EmailVerificationController::class, 'logout'])
 
 Auth::routes(['register' => false, 'reset' => false, 'verify' => false]);
 
-// ── Rutas Admin (protegidas con auth) ────────────────────────────────────────
+// ── Términos y condiciones ────────────────────────────────────────────────────
 
-Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
+Route::middleware('auth')->group(function () {
+    Route::get('/terminos', [TermsController::class, 'show'])->name('terms.show');
+    Route::post('/terminos/aceptar', [TermsController::class, 'accept'])->name('terms.accept');
+});
+
+// ── Portal del trabajador ─────────────────────────────────────────────────────
+
+Route::middleware(['auth', 'terms'])->group(function () {
+    Route::get('/mi-perfil', [WorkerProfileController::class, 'edit'])->name('worker.profile.edit');
+    Route::put('/mi-perfil', [WorkerProfileController::class, 'update'])->name('worker.profile.update');
+});
+
+// ── Rutas Admin (protegidas con auth + admin + terms) ─────────────────────────
+
+Route::prefix('admin')->middleware(['auth', 'terms', 'admin'])->name('admin.')->group(function () {
 
     Route::get('/', [Admin\DashboardController::class, 'index'])->name('dashboard');
 
     // Trabajadores
     Route::resource('workers', Admin\WorkerController::class)->except(['show']);
     Route::post('workers/{worker}/approve', [Admin\WorkerController::class, 'approve'])->name('workers.approve');
+
+    // Cuentas de trabajadores
+    Route::post('workers/{worker}/create-account', [Admin\WorkerAccountController::class, 'store'])->name('workers.create-account');
+    Route::post('workers/{worker}/reset-password', [Admin\WorkerAccountController::class, 'resetPassword'])->name('workers.reset-password');
+    Route::delete('workers/{worker}/delete-account', [Admin\WorkerAccountController::class, 'destroy'])->name('workers.delete-account');
 
     // Categorías
     Route::get('categories', [Admin\CategoryController::class, 'index'])->name('categories.index');

@@ -10,12 +10,18 @@ class AdminUserSeeder extends Seeder
 {
     public function run()
     {
-        User::firstOrCreate(
+        $user = User::firstOrCreate(
             ['email' => 'admin@servipueblo.com'],
             [
                 'name'     => 'Administrador',
                 'password' => Hash::make('admin1234'),
+                'role'     => 'admin',
             ]
         );
+
+        // Garantizar que el admin siempre tenga role correcto
+        if ($user->role !== 'admin') {
+            $user->update(['role' => 'admin']);
+        }
     }
 }

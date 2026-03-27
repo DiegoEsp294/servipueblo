@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreWorkerRequest;
 use App\Models\Category;
+use App\Models\Tag;
 use App\Models\Worker;
 use App\Models\WorkerPhoto;
 use Illuminate\Support\Facades\Storage;
@@ -26,8 +27,9 @@ class WorkerController extends Controller
 
     public function create()
     {
-        $categories = Category::ordered()->get();
-        return view('admin.workers.create', compact('categories'));
+        $categories  = Category::ordered()->get();
+        $tagsGrouped = Tag::allGrouped();
+        return view('admin.workers.create', compact('categories', 'tagsGrouped'));
     }
 
     public function store(StoreWorkerRequest $request)
@@ -45,10 +47,11 @@ class WorkerController extends Controller
             }
         }
 
-        unset($data['photo'], $data['category_ids']);
+        unset($data['photo'], $data['category_ids'], $data['tags']);
         $worker = Worker::create($data);
 
         $this->syncCategories($worker, $request->input('category_ids', []));
+        $worker->tags()->sync($request->input('tags', []));
         $this->syncWorkPhotos($request, $worker);
 
         return redirect()->route('admin.workers.index')->with('success', 'Trabajador creado correctamente.');
@@ -56,9 +59,10 @@ class WorkerController extends Controller
 
     public function edit(Worker $worker)
     {
-        $worker->load('categories');
-        $categories = Category::ordered()->get();
-        return view('admin.workers.edit', compact('worker', 'categories'));
+        $worker->load('categories', 'tags', 'user');
+        $categories  = Category::ordered()->get();
+        $tagsGrouped = Tag::allGrouped();
+        return view('admin.workers.edit', compact('worker', 'categories', 'tagsGrouped'));
     }
 
     public function update(StoreWorkerRequest $request, Worker $worker)
@@ -78,10 +82,11 @@ class WorkerController extends Controller
             }
         }
 
-        unset($data['photo'], $data['category_ids']);
+        unset($data['photo'], $data['category_ids'], $data['tags']);
         $worker->update($data);
 
         $this->syncCategories($worker, $request->input('category_ids', []));
+        $worker->tags()->sync($request->input('tags', []));
 
         // Eliminar fotos marcadas para borrar
         $deleteIds = array_filter(explode(',', request('delete_photos', '')));

@@ -120,6 +120,16 @@
             </div>
         @endif
 
+        @if($worker->tags->isNotEmpty())
+            <div class="flex flex-wrap gap-2 mt-4">
+                @foreach($worker->tags as $tag)
+                    <span class="inline-flex items-center gap-1 text-xs px-3 py-1 rounded-full bg-gray-50 border border-gray-200 text-gray-600">
+                        {{ $tag->icon }} {{ $tag->name }}
+                    </span>
+                @endforeach
+            </div>
+        @endif
+
         <div class="mt-5 flex gap-3 flex-wrap">
             {{-- WhatsApp con tracking --}}
             <a href="{{ $worker->whatsapp_track_url }}"
@@ -423,7 +433,7 @@
         // Categoría y pueblo
         ctx.fillStyle = '#6b7280';
         ctx.font = '13px sans-serif';
-        ctx.fillText('{{ ($worker->category?->name ?? $categoryNames) . ' · ' . $worker->town }}', cardWidth / 2, qrSize + 87);
+        ctx.fillText('{{ (optional($worker->category)->name ?? $categoryNames) . ' · ' . $worker->town }}', cardWidth / 2, qrSize + 87);
 
         // URL pequeña
         ctx.fillStyle = '#9ca3af';

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso Admin · ServiPueblo</title>
+    <title>Ingresar · ServiPueblo</title>
     <link rel="stylesheet" href="{{ mix('css/app.css') }}">
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center">
@@ -11,7 +11,7 @@
 <div class="w-full max-w-sm">
     <div class="text-center mb-6">
         <div class="text-3xl font-bold text-gray-900">🛠️ ServiPueblo</div>
-        <p class="text-sm text-gray-500 mt-1">Panel de administración</p>
+        <p class="text-sm text-gray-500 mt-1">Acceso para trabajadores y administradores</p>
     </div>
 
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
@@ -47,7 +47,13 @@
         </form>
     </div>
 
-    <p class="text-center mt-4 text-xs text-gray-400">
+    <div class="mt-4 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-xs text-blue-700 text-center">
+        ¿Sos trabajador o emprendedor y querés gestionar tu perfil?<br>
+        Escribinos a <a href="mailto:servipueblosoporte@gmail.com" class="font-medium underline hover:text-blue-900">servipueblosoporte@gmail.com</a>
+        y te creamos tu acceso.
+    </div>
+
+    <p class="text-center mt-3 text-xs text-gray-400">
         <a href="{{ route('home') }}" class="hover:underline">← Ver sitio público</a>
     </p>
 </div>

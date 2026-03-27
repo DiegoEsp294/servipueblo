@@ -41,7 +41,7 @@ class WorkerController extends Controller
         $clearCookie = $request->has('limpiar');
         if ($clearCookie) $pueblo = '';
 
-        $query = Worker::active()->with('categories')->orderByDesc('average_rating');
+        $query = Worker::active()->with('categories', 'tags')->orderByDesc('average_rating');
 
         if ($tipo) {
             $query->where('type', $tipo);
@@ -82,7 +82,7 @@ class WorkerController extends Controller
             return redirect($worker->profile_url, 301);
         }
 
-        $worker->load(['categories', 'ratings' => fn($q) => $q->latest()->limit(10), 'photos']);
+        $worker->load(['categories', 'tags', 'ratings' => fn($q) => $q->latest()->limit(10), 'photos']);
 
         WorkerEvent::record($worker, WorkerEvent::TYPE_VIEW);
 

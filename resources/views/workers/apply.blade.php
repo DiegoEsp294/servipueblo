@@ -116,6 +116,32 @@
                           class="w-full border border-gray-300 rounded px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none">{{ old('description') }}</textarea>
             </div>
 
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Etiquetas <span class="text-gray-400 font-normal">(opcional, máx. 6)</span>
+                </label>
+                <p class="text-xs text-gray-400 mb-2">Marcá lo que mejor describe tu servicio para que el asistente te recomiende mejor.</p>
+                @foreach($tagsGrouped as $group => $groupTags)
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mt-3 mb-1">
+                        {{ \App\Models\Tag::$groupLabels[$group] ?? $group }}
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        @foreach($groupTags as $tag)
+                            @php $checked = in_array($tag->id, old('tags', [])); @endphp
+                            <label class="inline-flex items-center gap-1 cursor-pointer select-none">
+                                <input type="checkbox" name="tags[]" value="{{ $tag->id }}"
+                                       {{ $checked ? 'checked' : '' }}
+                                       class="tag-checkbox sr-only">
+                                <span class="tag-pill px-2.5 py-1 rounded-full text-xs border transition-colors
+                                             {{ $checked ? 'bg-brand-600 text-white border-brand-600' : 'bg-white text-gray-600 border-gray-300 hover:border-brand-400' }}">
+                                    {{ $tag->icon }} {{ $tag->name }}
+                                </span>
+                            </label>
+                        @endforeach
+                    </div>
+                @endforeach
+            </div>
+
             <button type="submit"
                     class="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 rounded-lg transition-colors">
                 Enviar solicitud
@@ -155,6 +181,28 @@
     // Estado inicial
     var checked = document.querySelector('input[name="type"]:checked');
     if (checked) switchCategory(checked.value);
+})();
+
+// ── Tag pills ────────────────────────────────────────────────────────────────
+(function () {
+    var MAX_TAGS = 6;
+    document.querySelectorAll('.tag-checkbox').forEach(function (cb) {
+        cb.addEventListener('change', function () {
+            var checked = document.querySelectorAll('.tag-checkbox:checked');
+            if (this.checked && checked.length > MAX_TAGS) {
+                this.checked = false;
+                return;
+            }
+            var pill = this.nextElementSibling;
+            if (this.checked) {
+                pill.classList.add('bg-brand-600', 'text-white', 'border-brand-600');
+                pill.classList.remove('bg-white', 'text-gray-600', 'border-gray-300');
+            } else {
+                pill.classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
+                pill.classList.add('bg-white', 'text-gray-600', 'border-gray-300');
+            }
+        });
+    });
 })();
 </script>
 @endpush

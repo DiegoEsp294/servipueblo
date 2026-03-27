@@ -27,6 +27,8 @@ class StoreWorkerRequest extends FormRequest
             'town'           => ['required', 'string', 'max:100'],
             'photo'          => ['nullable', 'image', 'max:10240'],
             'is_active'      => ['nullable', 'boolean'],
+            'tags'           => ['nullable', 'array', 'max:6'],
+            'tags.*'         => ['integer', 'exists:tags,id'],
         ];
     }
 

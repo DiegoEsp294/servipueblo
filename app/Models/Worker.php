@@ -71,6 +71,16 @@ class Worker extends Model
         return $this->hasMany(WorkerEvent::class);
     }
 
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class, 'tag_worker')->orderBy('group_name')->orderBy('name');
+    }
+
+    public function user()
+    {
+        return $this->hasOne(User::class);
+    }
+
     // ── Accessor de compatibilidad: $worker->category devuelve la primaria ──
 
     public function getCategoryAttribute()

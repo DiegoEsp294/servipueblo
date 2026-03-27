@@ -184,6 +184,35 @@
         </div>
     </div>
 
+    {{-- Etiquetas --}}
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+            Etiquetas <span class="text-gray-400 font-normal">(máx. 6)</span>
+        </label>
+        @php
+            $selectedTagIds = old('tags', optional($worker)->tags ? $worker->tags->pluck('id')->toArray() : []);
+        @endphp
+        @foreach($tagsGrouped as $group => $groupTags)
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mt-3 mb-1">
+                {{ \App\Models\Tag::$groupLabels[$group] ?? $group }}
+            </p>
+            <div class="flex flex-wrap gap-2">
+                @foreach($groupTags as $tag)
+                    @php $checked = in_array($tag->id, $selectedTagIds); @endphp
+                    <label class="inline-flex items-center gap-1 cursor-pointer select-none">
+                        <input type="checkbox" name="tags[]" value="{{ $tag->id }}"
+                               {{ $checked ? 'checked' : '' }}
+                               class="tag-checkbox sr-only">
+                        <span class="tag-pill px-2.5 py-1 rounded-full text-xs border transition-colors
+                                     {{ $checked ? 'bg-brand-600 text-white border-brand-600' : 'bg-white text-gray-600 border-gray-300 hover:border-brand-400' }}">
+                            {{ $tag->icon }} {{ $tag->name }}
+                        </span>
+                    </label>
+                @endforeach
+            </div>
+        @endforeach
+    </div>
+
     {{-- Activo --}}
     <div class="flex items-center gap-2">
         <input type="hidden" name="is_active" value="0">
@@ -255,6 +284,28 @@
         });
 
         updatePrimary();
+    })();
+
+    // ── Tag pills ─────────────────────────────────────────────────────────────
+    (function () {
+        var MAX_TAGS = 6;
+        document.querySelectorAll('.tag-checkbox').forEach(function (cb) {
+            cb.addEventListener('change', function () {
+                var checked = document.querySelectorAll('.tag-checkbox:checked');
+                if (this.checked && checked.length > MAX_TAGS) {
+                    this.checked = false;
+                    return;
+                }
+                var pill = this.nextElementSibling;
+                if (this.checked) {
+                    pill.classList.add('bg-brand-600', 'text-white', 'border-brand-600');
+                    pill.classList.remove('bg-white', 'text-gray-600', 'border-gray-300');
+                } else {
+                    pill.classList.remove('bg-brand-600', 'text-white', 'border-brand-600');
+                    pill.classList.add('bg-white', 'text-gray-600', 'border-gray-300');
+                }
+            });
+        });
     })();
 </script>
 @endpush
