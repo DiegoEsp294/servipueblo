@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreRatingRequest;
 use App\Models\Worker;
+use Illuminate\Http\Request;
 
 class RatingController extends Controller
 {
     public function store(StoreRatingRequest $request, Worker $worker)
     {
         abort_unless($worker->is_active, 404);
+
+        $cookieKey = 'rated_worker_' . $worker->id;
 
         if (auth()->check()) {
             // Usuario logueado: una calificación por cuenta
@@ -24,10 +27,14 @@ class RatingController extends Controller
                 'ip_address'    => $request->ip(),
             ]);
         } else {
-            // Anónimo: una calificación por IP
-            if ($worker->ratings()->where('ip_address', $request->ip())->exists()) {
+            // Anónimo: verificar por cookie Y por IP
+            if ($request->cookie($cookieKey)) {
                 return back()->with('error', 'Ya calificaste a este trabajador desde este dispositivo.');
             }
+            if ($worker->ratings()->whereNotNull('ip_address')->where('ip_address', $request->ip())->exists()) {
+                return back()->with('error', 'Ya calificaste a este trabajador desde este dispositivo.');
+            }
+
             $worker->ratings()->create([
                 'score'         => $request->score,
                 'comment'       => $request->comment,
@@ -38,6 +45,9 @@ class RatingController extends Controller
 
         $worker->recalculateRating();
 
-        return back()->with('success', '¡Gracias por tu calificación!');
+        // Cookie que dura 1 año
+        return back()
+            ->with('success', '¡Gracias por tu calificación!')
+            ->withCookie(cookie($cookieKey, '1', 60 * 24 * 365));
     }
 }
