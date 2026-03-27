@@ -17,26 +17,29 @@ class WorkerAccountController extends Controller
             return back()->with('error', 'Este trabajador ya tiene una cuenta.');
         }
 
+        // Si no tiene email, generar uno de placeholder
+        $email = $worker->email ?: 'trabajador' . $worker->id . '@servipueblo.com';
+
         if (!$worker->email) {
-            return back()->with('error', 'El trabajador no tiene email. Agregá uno primero.');
+            $worker->update(['email' => $email]);
         }
 
-        if (User::where('email', $worker->email)->exists()) {
-            return back()->with('error', 'Ya existe un usuario con el email ' . $worker->email . '.');
+        if (User::where('email', $email)->exists()) {
+            return back()->with('error', 'Ya existe un usuario con el email ' . $email . '.');
         }
 
         $password = Str::random(10);
 
         User::create([
             'name'      => $worker->name,
-            'email'     => $worker->email,
+            'email'     => $email,
             'password'  => Hash::make($password),
             'role'      => 'worker',
             'worker_id' => $worker->id,
         ]);
 
         return back()->with('account_created', [
-            'email'    => $worker->email,
+            'email'    => $email,
             'password' => $password,
         ]);
     }

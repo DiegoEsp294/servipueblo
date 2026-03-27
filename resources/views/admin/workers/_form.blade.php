@@ -142,30 +142,31 @@
         <label class="block text-sm font-medium text-gray-700 mb-2">Fotos de trabajos realizados (máx. 5)</label>
 
         @if(optional($worker)->photos && $worker->photos->count())
-            <div class="flex flex-wrap gap-2 mb-3">
+            <p class="text-xs text-gray-400 mb-2">Marcá las que querés eliminar y guardá los cambios.</p>
+            <div class="flex flex-wrap gap-3 mb-3">
                 @foreach($worker->photos as $photo)
-                    <div class="relative group">
-                        <img src="{{ $photo->url }}" class="w-24 h-24 object-cover rounded border border-gray-200">
-                        <label class="absolute inset-0 bg-red-500 bg-opacity-0 group-hover:bg-opacity-60 rounded flex items-center justify-center cursor-pointer transition-all">
+                    <div class="flex flex-col items-center gap-1">
+                        <img src="{{ $photo->url }}" class="w-24 h-24 object-cover rounded border border-gray-200"
+                             onerror="this.classList.add('opacity-30'); this.closest('div').querySelector('.broken-badge').classList.remove('hidden')">
+                        <span class="broken-badge hidden text-xs text-red-500 font-medium">⚠ Error</span>
+                        <label class="flex items-center gap-1 cursor-pointer select-none">
                             <input type="checkbox" name="delete_photos_check[]" value="{{ $photo->id }}"
-                                   class="hidden delete-photo-check">
-                            <span class="text-white text-xs font-bold opacity-0 group-hover:opacity-100">✕ Borrar</span>
+                                   class="delete-photo-check accent-red-500">
+                            <span class="text-xs text-red-600 font-medium">Eliminar</span>
                         </label>
                     </div>
                 @endforeach
             </div>
             <input type="hidden" name="delete_photos" id="delete_photos_input" value="">
-            <p class="text-xs text-gray-400 mb-2">Hover sobre una foto y tildala para eliminarla al guardar.</p>
         @endif
 
         @php $slotsLeft = 5 - (optional($worker)->photos ? $worker->photos->count() : 0); @endphp
-        @if($slotsLeft > 0)
-            <input type="file" name="work_photos[]" accept="image/*" multiple
-                   class="w-full text-sm text-gray-600">
-            <p class="text-xs text-gray-400 mt-0.5">Podés subir hasta {{ $slotsLeft }} foto(s) más · JPG o PNG · Máx. 10MB c/u</p>
-        @else
-            <p class="text-xs text-gray-400">Ya tiene 5 fotos. Eliminá alguna para agregar nuevas.</p>
-        @endif
+        <input type="file" name="work_photos[]" accept="image/*" multiple
+               class="w-full text-sm text-gray-600">
+        <p class="text-xs text-gray-400 mt-0.5">
+            {{ $slotsLeft > 0 ? "Podés subir hasta {$slotsLeft} foto(s) más" : "Ya tiene 5 fotos — eliminá alguna para agregar nuevas" }}
+            · JPG o PNG · Máx. 10MB c/u
+        </p>
     </div>
 
     {{-- Disponibilidad --}}
@@ -228,8 +229,7 @@
 <script>
     // Fotos de trabajo — selección para borrar
     document.querySelectorAll('.delete-photo-check').forEach(function(cb) {
-        cb.closest('label').addEventListener('click', function() {
-            cb.checked = !cb.checked;
+        cb.addEventListener('change', function() {
             var ids = Array.from(document.querySelectorAll('.delete-photo-check:checked')).map(function(el) { return el.value; });
             document.getElementById('delete_photos_input').value = ids.join(',');
         });
