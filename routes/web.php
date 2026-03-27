@@ -98,6 +98,11 @@ Route::prefix('admin')->middleware(['auth', 'terms', 'admin'])->name('admin.')->
     Route::get('metrics', [Admin\MetricsController::class, 'index'])->name('metrics.index');
     Route::get('metrics/trabajador/{worker}', [Admin\MetricsController::class, 'worker'])->name('metrics.worker');
 
+    // Logs del chat IA
+    Route::get('chat-logs', [Admin\ChatLogController::class, 'index'])->name('chat-logs.index');
+    Route::patch('chat-logs/{chatLog}', [Admin\ChatLogController::class, 'update'])->name('chat-logs.update');
+    Route::delete('chat-logs/{chatLog}', [Admin\ChatLogController::class, 'destroy'])->name('chat-logs.destroy');
+
     // Diagnóstico storage
     Route::get('storage-test', function () {
         try {

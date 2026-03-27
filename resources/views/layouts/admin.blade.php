@@ -38,6 +38,7 @@
             <a href="{{ route('admin.categories.index') }}" class="flex items-center gap-2 py-3 border-b border-gray-700">🗂️ Categorías</a>
             <a href="{{ route('admin.ratings.index') }}" class="flex items-center gap-2 py-3 border-b border-gray-700">⭐ Calificaciones</a>
             <a href="{{ route('admin.metrics.index') }}" class="flex items-center gap-2 py-3 border-b border-gray-700">📈 Métricas</a>
+            <a href="{{ route('admin.chat-logs.index') }}" class="flex items-center gap-2 py-3 border-b border-gray-700">💬 Chat IA</a>
             <form method="POST" action="{{ route('logout') }}" class="mt-4">
                 @csrf
                 <button type="submit" class="text-red-400">Cerrar sesión</button>
@@ -73,6 +74,10 @@
                 <a href="{{ route('admin.metrics.index') }}"
                    class="flex items-center gap-2 px-4 py-2 hover:bg-gray-700 {{ request()->routeIs('admin.metrics.*') ? 'bg-gray-700 text-white' : '' }}">
                     📈 Métricas
+                </a>
+                <a href="{{ route('admin.chat-logs.index') }}"
+                   class="flex items-center gap-2 px-4 py-2 hover:bg-gray-700 {{ request()->routeIs('admin.chat-logs.*') ? 'bg-gray-700 text-white' : '' }}">
+                    💬 Chat IA
                 </a>
             </nav>
             <div class="px-4 py-3 border-t border-gray-700 text-xs">
