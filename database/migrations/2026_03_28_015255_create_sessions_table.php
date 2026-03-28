@@ -1,35 +1,31 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 class CreateSessionsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
+    public $withinTransaction = false;
+
     public function up()
     {
-        Schema::create('sessions', function (Blueprint $table) {
-            $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->index();
-            $table->string('ip_address', 45)->nullable();
-            $table->text('user_agent')->nullable();
-            $table->text('payload');
-            $table->integer('last_activity')->index();
-        });
+        DB::statement("
+            CREATE TABLE IF NOT EXISTS sessions (
+                id           VARCHAR(255) PRIMARY KEY,
+                user_id      BIGINT NULL,
+                ip_address   VARCHAR(45) NULL,
+                user_agent   TEXT NULL,
+                payload      TEXT NOT NULL,
+                last_activity INTEGER NOT NULL
+            )
+        ");
+
+        DB::statement('CREATE INDEX IF NOT EXISTS sessions_user_id_index ON sessions (user_id)');
+        DB::statement('CREATE INDEX IF NOT EXISTS sessions_last_activity_index ON sessions (last_activity)');
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
-        Schema::dropIfExists('sessions');
+        DB::statement('DROP TABLE IF EXISTS sessions');
     }
 }
