@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreWorkerRequest;
 use App\Models\Category;
 use App\Models\Tag;
+use App\Models\User;
 use App\Models\Worker;
 use App\Models\WorkerPhoto;
 use Illuminate\Support\Facades\Storage;
@@ -15,14 +16,39 @@ class WorkerController extends Controller
 {
     public function index()
     {
-        $query = Worker::with('categories')->latest();
+        $query = Worker::with(['categories', 'user'])->latest();
 
+        // Filtro por estado de activación
         if (request('estado') === 'pendiente') {
             $query->where('is_active', false);
         }
 
-        $workers = $query->paginate(20);
-        return view('admin.workers.index', compact('workers'));
+        // Filtro por cuenta de acceso
+        if (request('cuenta') === 'sin') {
+            $query->doesntHave('user');
+        } elseif (request('cuenta') === 'con') {
+            $query->has('user');
+        }
+
+        // Búsqueda por texto (nombre, descripción, pueblo)
+        if ($busqueda = request('busqueda')) {
+            $query->where(function ($q) use ($busqueda) {
+                $q->where('name', 'ilike', "%{$busqueda}%")
+                  ->orWhere('description', 'ilike', "%{$busqueda}%")
+                  ->orWhere('town', 'ilike', "%{$busqueda}%");
+            });
+        }
+
+        // Filtro por categoría
+        if ($catId = request('categoria')) {
+            $query->whereHas('categories', fn($q) => $q->where('categories.id', $catId));
+        }
+
+        $workers    = $query->paginate(20)->withQueryString();
+        $categories = Category::ordered()->get();
+        $sinCuenta  = Worker::doesntHave('user')->count();
+
+        return view('admin.workers.index', compact('workers', 'categories', 'sinCuenta'));
     }
 
     public function create()
