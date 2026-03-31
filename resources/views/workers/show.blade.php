@@ -43,9 +43,11 @@
   @endif
   "address": {
     "@type": "PostalAddress",
-    "addressLocality": "{{ $worker->town }}"
+    "addressLocality": "{{ $worker->town }}",
+    "addressRegion": "Santiago del Estero",
+    "addressCountry": "AR"
   },
-  "url": "{{ $worker->profile_url }}",
+  "url": "{{ url($worker->profile_url) }}",
   "image": "{{ $ogImage }}",
   "description": "{{ addslashes($ogDescription) }}",
   "sameAs": ["{{ $worker->whatsapp_url }}"]
@@ -66,8 +68,17 @@
 
 <div class="max-w-2xl mx-auto">
 
-    {{-- Volver --}}
-    <a href="{{ url()->previous() }}" class="text-sm text-brand-600 hover:underline mb-4 inline-block">← Volver al directorio</a>
+    {{-- Breadcrumb SEO --}}
+    <nav class="text-xs text-gray-400 mb-4 flex items-center gap-1.5 flex-wrap">
+        <a href="{{ route('workers.index') }}" class="hover:text-brand-600">Directorio</a>
+        @if($primaryCat)
+            <span>›</span>
+            <a href="{{ route('category.landing.town', [$primaryCat->slug, \Illuminate\Support\Str::slug($worker->town)]) }}"
+               class="hover:text-brand-600">{{ $primaryCat->name }} en {{ $worker->town }}</a>
+        @endif
+        <span>›</span>
+        <span class="text-gray-600">{{ $worker->name }}</span>
+    </nav>
 
     {{-- Perfil principal --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">

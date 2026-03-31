@@ -106,7 +106,7 @@
 @if($categories->isNotEmpty())
 <div class="flex flex-wrap gap-2 mb-6">
     @foreach($categories as $cat)
-        <a href="{{ route('categories.show', $cat->slug) }}"
+        <a href="{{ route('category.landing', $cat->slug) }}"
            class="inline-flex items-center gap-1 text-sm px-3 py-1.5 rounded-full border
                   {{ request('categoria') === $cat->slug
                      ? 'bg-brand-600 text-white border-brand-600'

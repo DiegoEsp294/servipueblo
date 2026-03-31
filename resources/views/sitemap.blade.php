@@ -37,6 +37,18 @@
     </url>
     @endforeach
 
+    {{-- Landing pages categoría + pueblo --}}
+    @foreach($categoryTownPairs as $pair)
+    <url>
+        <loc>{{ $pair['townSlug']
+            ? route('category.landing.town', [$pair['catSlug'], $pair['townSlug']])
+            : route('category.landing', $pair['catSlug']) }}</loc>
+        <lastmod>{{ $pair['updated']->toAtomString() }}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+    </url>
+    @endforeach
+
     {{-- Perfiles de trabajadores y emprendimientos --}}
     @foreach($workers as $worker)
     <url>
