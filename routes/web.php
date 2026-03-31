@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 // ── Rutas públicas ───────────────────────────────────────────────────────────
 
 Route::get('/ping', fn() => response('', 204));
+Route::get('/offline', fn() => view('offline'))->name('offline');
 Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index']);
 
 Route::get('/', [WorkerController::class, 'index'])->name('home');
@@ -68,6 +69,10 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'terms'])->group(function () {
     Route::get('/mi-perfil', [WorkerProfileController::class, 'edit'])->name('worker.profile.edit');
     Route::put('/mi-perfil', [WorkerProfileController::class, 'update'])->name('worker.profile.update');
+    Route::get('/mi-perfil/novedades', [WorkerProfileController::class, 'posts'])->name('worker.posts.index');
+    Route::post('/mi-perfil/novedades', [WorkerProfileController::class, 'storePost'])->name('worker.posts.store');
+    Route::patch('/mi-perfil/novedades/{post}/agotado', [WorkerProfileController::class, 'toggleSoldOut'])->name('worker.posts.sold-out');
+    Route::delete('/mi-perfil/novedades/{post}', [WorkerProfileController::class, 'destroyPost'])->name('worker.posts.destroy');
 });
 
 // ── Rutas Admin (protegidas con auth + admin + terms) ─────────────────────────

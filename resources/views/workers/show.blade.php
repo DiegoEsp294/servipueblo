@@ -172,6 +172,47 @@
         </div>
     </div>
 
+    {{-- Novedades / Muro --}}
+    @if($worker->posts->isNotEmpty())
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+        <h2 class="font-semibold text-gray-800 mb-4">📢 Novedades</h2>
+        <div class="space-y-4">
+            @foreach($worker->posts->take(5) as $post)
+            <div class="border-b border-gray-50 last:border-0 pb-4 last:pb-0">
+                <div class="flex items-center gap-2 mb-1.5">
+                    <span class="text-xs text-gray-400">{{ $post->created_at->diffForHumans() }}</span>
+                    @if($post->is_sold_out)
+                        <span class="text-xs font-bold bg-red-100 text-red-600 rounded-full px-2 py-0.5">⚠ AGOTADO</span>
+                    @endif
+                </div>
+                <p class="text-sm text-gray-800 whitespace-pre-wrap {{ $post->is_sold_out ? 'opacity-50 line-through' : '' }}">{{ $post->content }}</p>
+                @if($post->photo_url)
+                    <img src="{{ $post->photo_url }}" alt="Novedad"
+                         class="mt-2 rounded-lg max-h-56 object-cover w-full {{ $post->is_sold_out ? 'opacity-40' : '' }}">
+                @endif
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    {{-- Horarios de atención --}}
+    @if($worker->businessHours->isNotEmpty() && $worker->businessHours->where('is_closed', false)->isNotEmpty())
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+        <h2 class="font-semibold text-gray-800 mb-4">🕐 Horarios de atención</h2>
+        <div class="grid grid-cols-1 gap-1 text-sm">
+            @foreach($worker->businessHours as $hour)
+            <div class="flex justify-between py-1.5 border-b border-gray-50 last:border-0">
+                <span class="font-medium text-gray-700">{{ \App\Models\BusinessHour::$days[$hour->day_of_week] }}</span>
+                <span class="{{ $hour->is_closed ? 'text-red-400' : 'text-gray-600' }}">
+                    {{ $hour->label }}
+                </span>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
     {{-- Galería de fotos de trabajos --}}
     @if($worker->photos->count())
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">

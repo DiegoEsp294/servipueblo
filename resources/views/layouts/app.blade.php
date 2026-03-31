@@ -25,6 +25,16 @@
 
     @stack('meta')
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛠️</text></svg>">
+
+    {{-- PWA --}}
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#16a34a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="ServiPueblo">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+
     <link rel="stylesheet" href="{{ mix('css/app.css') }}">
 </head>
 <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
@@ -294,6 +304,73 @@
             addMessage('Hubo un error. Intentá de nuevo.', false);
         });
     }
+    </script>
+
+    {{-- PWA: banner instalación + service worker --}}
+    <div id="pwa-banner"
+         class="hidden fixed bottom-0 left-0 right-0 z-[9998] bg-white border-t border-gray-200 shadow-lg px-4 py-3 flex items-center gap-3">
+        <img src="/icons/icon-192.png" class="w-10 h-10 rounded-xl shrink-0" alt="ServiPueblo">
+        <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-gray-800">Instalá ServiPueblo</p>
+            <p class="text-xs text-gray-500">Accedé rápido desde tu pantalla de inicio</p>
+        </div>
+        <button id="pwa-install-btn"
+                class="shrink-0 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+            Instalar
+        </button>
+        <button id="pwa-dismiss-btn" class="shrink-0 text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
+    </div>
+
+    <script>
+    // Service Worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+            navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+    }
+
+    // Banner de instalación (Android/Chrome)
+    (function () {
+        var deferredPrompt = null;
+        var banner = document.getElementById('pwa-banner');
+        var installBtn = document.getElementById('pwa-install-btn');
+        var dismissBtn = document.getElementById('pwa-dismiss-btn');
+
+        // No mostrar si ya fue descartado o instalado
+        if (localStorage.getItem('pwa-dismissed')) return;
+
+        window.addEventListener('beforeinstallprompt', function (e) {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Mostrar banner con pequeño delay para no interrumpir la carga
+            setTimeout(function () {
+                banner.classList.remove('hidden');
+                banner.classList.add('flex');
+            }, 3000);
+        });
+
+        installBtn.addEventListener('click', function () {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then(function (result) {
+                deferredPrompt = null;
+                banner.classList.add('hidden');
+                if (result.outcome === 'accepted') {
+                    localStorage.setItem('pwa-dismissed', '1');
+                }
+            });
+        });
+
+        dismissBtn.addEventListener('click', function () {
+            banner.classList.add('hidden');
+            localStorage.setItem('pwa-dismissed', '1');
+        });
+
+        // Si ya está instalada como PWA, ocultar banner
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            localStorage.setItem('pwa-dismissed', '1');
+        }
+    })();
     </script>
 </body>
 </html>

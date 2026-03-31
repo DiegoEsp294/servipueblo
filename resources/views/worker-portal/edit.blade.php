@@ -131,6 +131,43 @@
             @endforeach
         </div>
 
+        {{-- Horarios de atención --}}
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+                Horarios de atención
+                <span class="text-gray-400 font-normal">(opcional)</span>
+            </label>
+            <div class="border border-gray-200 rounded-lg overflow-hidden">
+                @foreach($days as $day => $name)
+                @php $h = $hoursByDay->get($day); @endphp
+                <div class="flex items-center gap-3 px-3 py-2.5 border-b border-gray-100 last:border-0
+                            {{ $loop->even ? 'bg-gray-50' : 'bg-white' }}">
+                    <span class="text-sm font-medium text-gray-700 w-20 shrink-0">{{ $name }}</span>
+
+                    <label class="flex items-center gap-1.5 cursor-pointer shrink-0">
+                        <input type="checkbox" name="hours[{{ $day }}][closed]" value="1"
+                               class="day-closed-check accent-red-500"
+                               data-day="{{ $day }}"
+                               {{ optional($h)->is_closed ? 'checked' : '' }}>
+                        <span class="text-xs text-gray-500">Cerrado</span>
+                    </label>
+
+                    <div class="flex items-center gap-1.5 flex-1 day-times-{{ $day }}
+                                {{ optional($h)->is_closed ? 'opacity-30 pointer-events-none' : '' }}">
+                        <input type="time" name="hours[{{ $day }}][open]"
+                               value="{{ optional($h)->open_time }}"
+                               class="flex-1 border border-gray-200 rounded px-2 py-1 text-sm text-center">
+                        <span class="text-gray-400 text-xs">a</span>
+                        <input type="time" name="hours[{{ $day }}][close]"
+                               value="{{ optional($h)->close_time }}"
+                               class="flex-1 border border-gray-200 rounded px-2 py-1 text-sm text-center">
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            <p class="text-xs text-gray-400 mt-1">Si no cargás horarios, no se muestran en tu perfil.</p>
+        </div>
+
         {{-- Foto de perfil --}}
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Foto de perfil</label>
@@ -189,6 +226,14 @@
         </button>
     </form>
 
+    {{-- Link al muro --}}
+    <div class="text-center mt-2">
+        <a href="{{ route('worker.posts.index') }}"
+           class="inline-flex items-center gap-2 text-sm text-brand-600 hover:underline font-medium">
+            📢 Publicar novedades / Menú del día →
+        </a>
+    </div>
+
     {{-- Cerrar sesión --}}
     <div class="text-center mt-4">
         <form method="POST" action="{{ route('logout') }}" class="inline">
@@ -222,6 +267,19 @@
         });
     });
 })();
+
+// Horarios — deshabilitar campos cuando se marca "Cerrado"
+document.querySelectorAll('.day-closed-check').forEach(function(cb) {
+    cb.addEventListener('change', function() {
+        var day = this.dataset.day;
+        var block = document.querySelector('.day-times-' + day);
+        if (this.checked) {
+            block.classList.add('opacity-30', 'pointer-events-none');
+        } else {
+            block.classList.remove('opacity-30', 'pointer-events-none');
+        }
+    });
+});
 
 // Fotos borrar — escuchar change en cada checkbox
 document.querySelectorAll('.delete-photo-check').forEach(function(cb) {

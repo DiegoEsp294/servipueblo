@@ -81,6 +81,16 @@ class Worker extends Model
         return $this->hasOne(User::class);
     }
 
+    public function businessHours()
+    {
+        return $this->hasMany(BusinessHour::class)->orderBy('day_of_week');
+    }
+
+    public function posts()
+    {
+        return $this->hasMany(WorkerPost::class)->latest();
+    }
+
     // ── Accessor de compatibilidad: $worker->category devuelve la primaria ──
 
     public function getCategoryAttribute()

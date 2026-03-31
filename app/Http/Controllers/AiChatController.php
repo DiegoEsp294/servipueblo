@@ -11,6 +11,281 @@ use Illuminate\Support\Facades\Http;
 
 class AiChatController extends Controller
 {
+    // Palabras cotidianas → categorías del directorio
+    // Clave: palabra que puede usar el usuario
+    // Valor: fragmentos de nombres de categoría que aplican
+    private const SEMANTIC_MAP = [
+        // Carpintero
+        'madera'        => ['Carpintero'],
+        'mesa'          => ['Carpintero', 'Herrero'],
+        'silla'         => ['Carpintero'],
+        'sillas'        => ['Carpintero'],
+        'mesas'         => ['Carpintero', 'Herrero'],
+        'mueble'        => ['Carpintero'],
+        'muebles'       => ['Carpintero'],
+        'placard'       => ['Carpintero'],
+        'ropero'        => ['Carpintero'],
+        'estante'       => ['Carpintero'],
+        'estantería'    => ['Carpintero'],
+        'parquet'       => ['Carpintero'],
+        'deck'          => ['Carpintero'],
+        'puerta madera' => ['Carpintero'],
+        'ventana'       => ['Carpintero'],
+        'marco'         => ['Carpintero'],
+
+        // Herrero / Soldador
+        'hierro'        => ['Herrero'],
+        'reja'          => ['Herrero'],
+        'rejas'         => ['Herrero'],
+        'portón'        => ['Herrero'],
+        'porton'        => ['Herrero'],
+        'metal'         => ['Herrero'],
+        'soldadura'     => ['Herrero'],
+        'soldador'      => ['Herrero'],
+        'barandas'      => ['Herrero'],
+        'baranda'       => ['Herrero'],
+        'puerta metálica' => ['Herrero'],
+        'tranquera'     => ['Herrero'],
+        'chapa'         => ['Herrero'],
+
+        // Albañil
+        'pared'         => ['Albañil'],
+        'paredes'       => ['Albañil'],
+        'techo'         => ['Albañil'],
+        'piso'          => ['Albañil'],
+        'pisos'         => ['Albañil'],
+        'cemento'       => ['Albañil'],
+        'ladrillo'      => ['Albañil'],
+        'ladrillos'     => ['Albañil'],
+        'revoque'       => ['Albañil'],
+        'refacción'     => ['Albañil'],
+        'refaccion'     => ['Albañil'],
+        'construcción'  => ['Albañil'],
+        'construccion'  => ['Albañil'],
+        'obra'          => ['Albañil'],
+        'zarpear'       => ['Albañil'],
+        'humedad'       => ['Albañil'],
+        'contrapiso'    => ['Albañil'],
+        'baldosa'       => ['Albañil'],
+
+        // Electricista
+        'luz'           => ['Electricista'],
+        'cable'         => ['Electricista'],
+        'cables'        => ['Electricista'],
+        'enchufe'       => ['Electricista'],
+        'electricidad'  => ['Electricista'],
+        'tablero'       => ['Electricista'],
+        'disyuntor'     => ['Electricista'],
+        'cortocircuito' => ['Electricista'],
+        'lámpara'       => ['Electricista'],
+        'lampara'       => ['Electricista'],
+        'lámparas'      => ['Electricista'],
+        'instalación eléctrica' => ['Electricista'],
+        'corte de luz'  => ['Electricista'],
+        'corriente'     => ['Electricista'],
+
+        // Plomero
+        'caño'          => ['Plomero'],
+        'cano'          => ['Plomero'],
+        'caños'         => ['Plomero'],
+        'canilla'       => ['Plomero'],
+        'canillas'      => ['Plomero'],
+        'pérdida'       => ['Plomero'],
+        'perdida agua'  => ['Plomero'],
+        'inodoro'       => ['Plomero'],
+        'ducha'         => ['Plomero'],
+        'desagüe'       => ['Plomero'],
+        'desague'       => ['Plomero'],
+        'grifo'         => ['Plomero'],
+        'termotanque'   => ['Plomero', 'Gasista'],
+        'tanque agua'   => ['Plomero'],
+        'pileta'        => ['Plomero', 'Albañil'],
+
+        // Gasista
+        'gas'           => ['Gasista'],
+        'garrafa'       => ['Gasista'],
+        'calefón'       => ['Gasista'],
+        'calefon'       => ['Gasista'],
+        'estufa'        => ['Gasista'],
+        'caldera'       => ['Gasista'],
+        'calefacción'   => ['Gasista'],
+        'calefaccion'   => ['Gasista'],
+
+        // Pintor
+        'pintura'       => ['Pintor'],
+        'pintar'        => ['Pintor'],
+        'pintada'       => ['Pintor'],
+        'pintor'        => ['Pintor'],
+
+        // Mecánico
+        'auto'          => ['Mecánico'],
+        'autos'         => ['Mecánico'],
+        'coche'         => ['Mecánico'],
+        'motor'         => ['Mecánico'],
+        'frenos'        => ['Mecánico'],
+        'aceite'        => ['Mecánico'],
+        'vehículo'      => ['Mecánico'],
+        'vehiculo'      => ['Mecánico'],
+        'camioneta'     => ['Mecánico'],
+        'camión'        => ['Mecánico'],
+        'camion'        => ['Mecánico'],
+        'mecánico'      => ['Mecánico'],
+        'mecanico'      => ['Mecánico'],
+
+        // Técnico PC / Celular
+        'computadora'   => ['Técnico PC', 'Técnico en TV'],
+        'celular'       => ['Técnico PC'],
+        'tablet'        => ['Técnico PC'],
+        'pantalla rota' => ['Técnico PC'],
+        'virus'         => ['Técnico PC'],
+        'notebook'      => ['Técnico PC'],
+        'formatear'     => ['Técnico PC'],
+        'internet'      => ['Técnico PC'],
+
+        // Técnico en A/C
+        'aire acondicionado' => ['Técnico en A/C'],
+        'split'         => ['Técnico en A/C'],
+        'refrigeración' => ['Técnico en A/C'],
+        'calor'         => ['Técnico en A/C'],
+
+        // Técnico TV
+        'televisor'     => ['Técnico en TV'],
+        'television'    => ['Técnico en TV'],
+        'tele'          => ['Técnico en TV'],
+
+        // Cerrajero
+        'cerradura'     => ['Cerrajero'],
+        'llave'         => ['Cerrajero'],
+        'candado'       => ['Cerrajero'],
+        'puerta trabada'=> ['Cerrajero'],
+        'corte de llave'=> ['Cerrajero'],
+        'copia llave'   => ['Cerrajero'],
+
+        // Jardinero
+        'jardín'        => ['Jardinero'],
+        'jardin'        => ['Jardinero'],
+        'pasto'         => ['Jardinero'],
+        'césped'        => ['Jardinero'],
+        'cesped'        => ['Jardinero'],
+        'poda'          => ['Jardinero'],
+        'árbol'         => ['Jardinero'],
+        'arbol'         => ['Jardinero'],
+        'maleza'        => ['Jardinero'],
+        'plantas'       => ['Jardinero', 'Vivero'],
+
+        // Fumigación
+        'cucaracha'     => ['Fumigac'],
+        'cucarachas'    => ['Fumigac'],
+        'bicho'         => ['Fumigac'],
+        'bichos'        => ['Fumigac'],
+        'rata'          => ['Fumigac'],
+        'ratas'         => ['Fumigac'],
+        'plaga'         => ['Fumigac'],
+        'mosquito'      => ['Fumigac'],
+        'mosquitos'     => ['Fumigac'],
+        'hormiga'       => ['Fumigac'],
+        'hormigas'      => ['Fumigac'],
+        'insecto'       => ['Fumigac'],
+        'garrapata'     => ['Fumigac'],
+
+        // Peluquería / Barbería
+        'pelo'          => ['Peluquería', 'Estética'],
+        'cabello'       => ['Peluquería'],
+        'corte'         => ['Peluquería', 'Barber'],
+        'tintura'       => ['Peluquería'],
+        'tinte'         => ['Peluquería'],
+        'barba'         => ['Barber'],
+        'barbería'      => ['Barber'],
+        'barberia'      => ['Barber'],
+
+        // Limpieza
+        'limpieza'      => ['Limpieza'],
+        'limpiar'       => ['Limpieza'],
+        'empleada'      => ['Limpieza'],
+        'mucama'        => ['Limpieza'],
+
+        // Fletes
+        'flete'         => ['Fletes'],
+        'fletes'        => ['Fletes'],
+        'mudanza'       => ['Fletes'],
+        'mudanzas'      => ['Fletes'],
+        'transporte'    => ['Fletes'],
+
+        // Comida / Panadería
+        'pan'           => ['Panadería'],
+        'torta'         => ['Panadería', 'Comida casera'],
+        'tortas'        => ['Panadería', 'Comida casera'],
+        'medialunas'    => ['Panadería'],
+        'facturas'      => ['Panadería'],
+        'budin'         => ['Panadería'],
+        'budín'         => ['Panadería'],
+        'pastel'        => ['Panadería', 'Comida casera'],
+        'pasteles'      => ['Panadería', 'Comida casera'],
+        'alfajor'       => ['Panadería'],
+        'galletitas'    => ['Panadería'],
+        'comida'        => ['Comida casera', 'Catering'],
+        'vianda'        => ['Comida casera'],
+        'viandas'       => ['Comida casera'],
+        'almuerzo'      => ['Comida casera', 'Catering'],
+        'cena'          => ['Comida casera', 'Catering'],
+        'catering'      => ['Catering'],
+        'evento'        => ['Catering'],
+        'cumpleaños'    => ['Catering', 'Panadería'],
+        'helado'        => ['Almacén'],
+
+        // Almacén / Verdulería / Carnicería
+        'verdura'       => ['Verdulería'],
+        'verduras'      => ['Verdulería'],
+        'fruta'         => ['Verdulería'],
+        'frutas'        => ['Verdulería'],
+        'carne'         => ['Carnicería'],
+        'carnes'        => ['Carnicería'],
+        'pollo'         => ['Carnicería'],
+        'chorizo'       => ['Carnicería'],
+        'almacén'       => ['Almacén'],
+        'almacen'       => ['Almacén'],
+        'kiosco'        => ['Kiosco'],
+        'golosinas'     => ['Kiosco'],
+        'huevos'        => ['Huevos'],
+
+        // Cuidados
+        'enfermero'     => ['Enfermero'],
+        'enfermera'     => ['Enfermero'],
+        'cuidador'      => ['Enfermero'],
+        'niñera'        => ['Niñera'],
+        'ninera'        => ['Niñera'],
+        'cuidado niños' => ['Niñera'],
+
+        // Estética / Cosméticos
+        'masaje'        => ['Masajista'],
+        'masajes'       => ['Masajista'],
+        'uñas'          => ['Estética', 'Cosméticos'],
+        'depilación'    => ['Estética'],
+        'depilacion'    => ['Estética'],
+        'cosméticos'    => ['Cosméticos'],
+        'cosmeticos'    => ['Cosméticos'],
+        'maquillaje'    => ['Cosméticos', 'Estética'],
+
+        // Fotografía
+        'foto'          => ['Fotógrafo'],
+        'fotos'         => ['Fotógrafo'],
+        'fotografía'    => ['Fotógrafo'],
+        'fotografia'    => ['Fotógrafo'],
+        'mural'         => ['Fotógrafo'],
+
+        // Ropa
+        'ropa'          => ['Indumentaria', 'Tienda de Ropa'],
+        'costura'       => ['Modista'],
+        'modista'       => ['Modista'],
+        'arreglo ropa'  => ['Modista'],
+        'remera'        => ['Indumentaria'],
+
+        // Vivero
+        'vivero'        => ['Vivero'],
+        'semillas'      => ['Vivero'],
+        'macetas'       => ['Vivero'],
+    ];
+
     private const INJECTION_PATTERNS = [
         'ignora', 'ignore', 'olvida', 'forget', 'system prompt',
         'instrucciones anteriores', 'previous instructions', 'eres ahora',
@@ -84,7 +359,7 @@ REGLAS:
 1. Solo respondés sobre los trabajadores y emprendimientos listados abajo. Nunca inventés datos.
 2. Cuando el usuario pide algo, mostrá TODOS los que coincidan (no solo uno), ordenados por más recomendaciones.
 3. Si un trabajador tiene disponibilidad "No disponible", aclaralo junto a su nombre.
-4. Usá las etiquetas y la descripción para responder preguntas específicas: horarios, domicilio, urgencias, métodos de pago, etc.
+4. Interpretá las consultas de forma natural como lo haría una persona. Si alguien pide "una mesa", eso implica un carpintero o herrero. Si pide "arreglar un caño", es un plomero. Usá el rubro del trabajador para inferir si puede satisfacer la necesidad aunque no esté explícito en la descripción. Además, usá las etiquetas y la descripción para responder preguntas específicas: horarios, domicilio, urgencias, métodos de pago, etc.
    Ejemplos:
    - "¿quién atiende domingos?" → buscá los que tienen etiqueta "Abre domingos"
    - "¿quién hace delivery?" → buscá etiqueta "Delivery / Envío"
@@ -189,8 +464,18 @@ PROMPT;
 
         $contextWordsStr = $words->join(', ');
 
-        // 1. Buscar categorías cuyo nombre contenga alguna palabra del contexto
-        //    O cuya palabra del contexto esté contenida en el nombre de la categoría
+        // 0. Expansión semántica: palabras cotidianas → nombres de categorías
+        $semanticCatFragments = [];
+        foreach (self::SEMANTIC_MAP as $keyword => $catFragments) {
+            if (str_contains($contextText, $keyword)) {
+                foreach ($catFragments as $fragment) {
+                    $semanticCatFragments[] = mb_strtolower($fragment);
+                }
+            }
+        }
+
+        // 1. Buscar categorías cuyo nombre contenga alguna palabra del contexto,
+        //    o coincida con la expansión semántica
         $categories    = Category::all();
         $matchedCatIds = [];
         foreach ($categories as $cat) {
@@ -203,6 +488,13 @@ PROMPT;
             // Alguna palabra del contexto aparece en el nombre de la categoría
             foreach ($words as $word) {
                 if (str_contains($catLower, $word)) {
+                    $matchedCatIds[] = $cat->id;
+                    break;
+                }
+            }
+            // Expansión semántica: el nombre de la categoría contiene algún fragmento semántico
+            foreach ($semanticCatFragments as $fragment) {
+                if (str_contains($catLower, $fragment)) {
                     $matchedCatIds[] = $cat->id;
                     break;
                 }

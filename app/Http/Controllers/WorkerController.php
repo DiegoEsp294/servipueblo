@@ -82,7 +82,14 @@ class WorkerController extends Controller
             return redirect($worker->profile_url, 301);
         }
 
-        $worker->load(['categories', 'tags', 'ratings' => fn($q) => $q->latest()->limit(10), 'photos']);
+        $worker->load([
+            'categories',
+            'tags',
+            'ratings'       => fn($q) => $q->latest()->limit(10),
+            'photos',
+            'businessHours',
+            'posts'         => fn($q) => $q->active()->latest()->limit(5),
+        ]);
 
         WorkerEvent::record($worker, WorkerEvent::TYPE_VIEW);
 
