@@ -147,12 +147,18 @@ class WorkerProfileController extends Controller
         elseif ($duration === 'none')   $expiresAt = null;
         else                            $expiresAt = now()->addDays(7);
 
-        WorkerPost::create([
+        $post = WorkerPost::create([
             'worker_id'  => $worker->id,
             'content'    => $data['content'],
             'photo_path' => $photoPath,
             'expires_at' => $expiresAt,
         ]);
+
+        // Pre-generar y cachear imagen para compartir
+        try {
+            $png = $this->buildShareCardBytes($worker->load('categories'), $post);
+            Storage::put('workers/share-cards/post-' . $post->id . '.png', $png);
+        } catch (\Throwable $e) {}
 
         return back()->with('success', '¡Novedad publicada!');
     }
@@ -194,6 +200,23 @@ class WorkerProfileController extends Controller
         abort_if($post->worker_id !== $worker->id, 404);
         $worker->load(['categories']);
 
+        $cachePath = 'workers/share-cards/post-' . $post->id . '.png';
+        if (Storage::exists($cachePath)) {
+            return response(Storage::get($cachePath), 200)
+                ->header('Content-Type', 'image/png')
+                ->header('Cache-Control', 'public, max-age=86400');
+        }
+
+        $png = $this->buildShareCardBytes($worker, $post);
+        try { Storage::put($cachePath, $png); } catch (\Throwable $e) {}
+
+        return response($png, 200)
+            ->header('Content-Type', 'image/png')
+            ->header('Cache-Control', 'public, max-age=86400');
+    }
+
+    private function buildShareCardBytes(\App\Models\Worker $worker, WorkerPost $post): string
+    {
         $w = 1080; $h = 1080;
         $img = imagecreatetruecolor($w, $h);
 
@@ -226,7 +249,7 @@ class WorkerProfileController extends Controller
             imagettftext($img, 44, 0, 50, 88, $cWhite, $fb, 'ServiPueblo');
             imagettftext($img, 46, 0, 60, 220, $cDark, $fb, $worker->name);
             if ($fr) {
-                $cats = $worker->categories->pluck('name')->join(' · ');
+                $cats = $worker->categories->pluck('name')->join(' - ');
                 imagettftext($img, 28, 0, 62, 270, $cGray, $fr, $cats);
             }
             imagefilledrectangle($img, 60, 298, $w - 60, 301, $cLightGray);
@@ -252,9 +275,9 @@ class WorkerProfileController extends Controller
                         $sw = imagesx($src); $sh = imagesy($src);
                         $side = min($sw, $sh);
                         $destSize = 400;
-                        $destX = ($w - $destSize) / 2;
+                        $destX = (int)(($w - $destSize) / 2);
                         $destY = $h - 90 - $destSize - 30;
-                        imagecopyresampled($img, $src, $destX, $destY, ($sw - $side) / 2, ($sh - $side) / 2, $destSize, $destSize, $side, $side);
+                        imagecopyresampled($img, $src, $destX, $destY, (int)(($sw - $side) / 2), (int)(($sh - $side) / 2), $destSize, $destSize, $side, $side);
                         imagedestroy($src);
                     }
                 }
@@ -266,9 +289,7 @@ class WorkerProfileController extends Controller
         $png = ob_get_clean();
         imagedestroy($img);
 
-        return response($png, 200)
-            ->header('Content-Type', 'image/png')
-            ->header('Cache-Control', 'public, max-age=3600');
+        return $png;
     }
 
     private function gdDrawWrapped($img, $font, $size, $color, $text, $x, $y, $maxWidth, $lineH): void

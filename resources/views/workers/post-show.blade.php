@@ -4,7 +4,6 @@
     use Illuminate\Support\Str;
     $ogTitle       = $worker->name . ' — ' . Str::limit($post->content, 70);
     $ogDescription = $post->content;
-    $ogImage       = $post->photo_url ?? $worker->photo_url ?? asset('images/og-default.png');
     $postUrl       = route('worker.post.show', [$worker->slug, $post->id]);
     $imageUrl      = route('worker.post.image', [$worker->slug, $post->id]);
 @endphp
@@ -13,7 +12,7 @@
 @section('description', Str::limit($ogDescription, 160))
 @section('og_title', $ogTitle)
 @section('og_description', $ogDescription)
-@section('og_image', $ogImage)
+@section('og_image', $imageUrl)
 @section('og_image_width', '1080')
 @section('og_image_height', '1080')
 @section('og_type', 'article')
