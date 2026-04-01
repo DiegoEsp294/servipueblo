@@ -10,10 +10,28 @@ class SitemapController extends Controller
 {
     public function index()
     {
+        // Servir el archivo estático si existe (generado por generate())
+        $static = public_path('sitemap.xml');
+        if (file_exists($static)) {
+            return response(file_get_contents($static), 200)
+                ->header('Content-Type', 'application/xml')
+                ->header('Cache-Control', 'public, max-age=3600');
+        }
+
+        return response($this->build(), 200)->header('Content-Type', 'application/xml');
+    }
+
+    public function generate()
+    {
+        $content = $this->build();
+        file_put_contents(public_path('sitemap.xml'), $content);
+    }
+
+    private function build(): string
+    {
         $workers    = Worker::active()->orderByDesc('updated_at')->get(['slug', 'type', 'updated_at']);
         $categories = Category::ordered()->get(['id', 'slug', 'updated_at']);
 
-        // Combinaciones categoría + pueblo con al menos 1 trabajador activo
         $categoryTownPairs = collect();
         foreach ($categories as $cat) {
             $towns = Worker::active()
@@ -28,7 +46,6 @@ class SitemapController extends Controller
                 ]);
             }
 
-            // También la página de solo categoría (sin pueblo)
             if ($towns->isNotEmpty()) {
                 $categoryTownPairs->push([
                     'catSlug'  => $cat->slug,
@@ -38,8 +55,6 @@ class SitemapController extends Controller
             }
         }
 
-        $content = view('sitemap', compact('workers', 'categories', 'categoryTownPairs'))->render();
-
-        return response($content, 200)->header('Content-Type', 'application/xml');
+        return view('sitemap', compact('workers', 'categories', 'categoryTownPairs'))->render();
     }
 }
