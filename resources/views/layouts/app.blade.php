@@ -36,8 +36,8 @@
     </script>
 
     @stack('meta')
-    <link rel="icon" type="image/png" href="/icons/icon-gpt.png">
-    <link rel="shortcut icon" type="image/png" href="/icons/icon-gpt.png">
+    <link rel="icon" type="image/png" sizes="any" href="/icons/icon-gpt.png">
+    <link rel="shortcut icon" type="image/png" href="/favicon.ico">
 
     {{-- PWA --}}
     <link rel="manifest" href="/manifest.json">
