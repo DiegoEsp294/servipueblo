@@ -69,6 +69,12 @@
                     @endif
                 </div>
                 <div class="flex items-center gap-3 shrink-0">
+                    {{-- Compartir --}}
+                    <a href="{{ route('worker.post.show', [$worker->slug, $post->id]) }}"
+                       target="_blank"
+                       class="text-xs text-brand-600 hover:text-brand-700 font-medium">
+                        Compartir
+                    </a>
                     {{-- Agotado toggle --}}
                     <form method="POST" action="{{ route('worker.posts.sold-out', $post) }}">
                         @csrf @method('PATCH')

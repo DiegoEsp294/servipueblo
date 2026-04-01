@@ -13,7 +13,7 @@ class WorkerProfileController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('auth')->except(['showPost', 'postShareImage']);
     }
 
     private function workerOrAbort()
@@ -178,5 +178,115 @@ class WorkerProfileController extends Controller
         $post->delete();
 
         return back()->with('success', 'Novedad eliminada.');
+    }
+
+    // ── Página pública de novedad (para compartir) ────────────────────────────
+
+    public function showPost(\App\Models\Worker $worker, WorkerPost $post)
+    {
+        abort_if($post->worker_id !== $worker->id, 404);
+        $worker->load(['categories']);
+        return view('workers.post-show', compact('worker', 'post'));
+    }
+
+    public function postShareImage(\App\Models\Worker $worker, WorkerPost $post)
+    {
+        abort_if($post->worker_id !== $worker->id, 404);
+        $worker->load(['categories']);
+
+        $w = 1080; $h = 1080;
+        $img = imagecreatetruecolor($w, $h);
+
+        $cWhite     = imagecolorallocate($img, 255, 255, 255);
+        $cGreen     = imagecolorallocate($img, 22, 163, 74);
+        $cDark      = imagecolorallocate($img, 17, 24, 39);
+        $cGray      = imagecolorallocate($img, 107, 114, 128);
+        $cLightGray = imagecolorallocate($img, 229, 231, 235);
+
+        imagefill($img, 0, 0, $cWhite);
+        imagefilledrectangle($img, 0, 0, $w, 130, $cGreen);
+        imagefilledrectangle($img, 0, $h - 90, $w, $h, $cGreen);
+
+        $fontBold = null; $fontRegular = null;
+        foreach ([
+            '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+            '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf',
+            '/usr/share/fonts/truetype/freefont/FreeSansBold.ttf',
+        ] as $f) { if (file_exists($f)) { $fontBold = $f; break; } }
+        foreach ([
+            '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+            '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
+            '/usr/share/fonts/truetype/freefont/FreeSans.ttf',
+        ] as $f) { if (file_exists($f)) { $fontRegular = $f; break; } }
+
+        $fb = $fontBold ?? $fontRegular;
+        $fr = $fontRegular ?? $fontBold;
+
+        if ($fb) {
+            imagettftext($img, 44, 0, 50, 88, $cWhite, $fb, 'ServiPueblo');
+            imagettftext($img, 46, 0, 60, 220, $cDark, $fb, $worker->name);
+            if ($fr) {
+                $cats = $worker->categories->pluck('name')->join(' · ');
+                imagettftext($img, 28, 0, 62, 270, $cGray, $fr, $cats);
+            }
+            imagefilledrectangle($img, 60, 298, $w - 60, 301, $cLightGray);
+            if ($fr) $this->gdDrawWrapped($img, $fr, 32, $cDark, $post->content, 60, 350, $w - 120, 48);
+            if ($fr) imagettftext($img, 26, 0, 50, $h - 28, $cWhite, $fr, 'servipueblo.onrender.com');
+        } else {
+            imagestring($img, 5, 50, 50, 'ServiPueblo', $cWhite);
+            imagestring($img, 5, 60, 180, $worker->name, $cDark);
+            $lines = explode("\n", wordwrap($post->content, 55, "\n", true));
+            $y = 270;
+            foreach (array_slice($lines, 0, 15) as $line) {
+                imagestring($img, 4, 60, $y, $line, $cDark); $y += 26;
+            }
+            imagestring($img, 3, 50, $h - 50, 'servipueblo.onrender.com', $cWhite);
+        }
+
+        if ($post->photo_path) {
+            try {
+                $data = @file_get_contents($post->photo_url);
+                if ($data) {
+                    $src = @imagecreatefromstring($data);
+                    if ($src) {
+                        $sw = imagesx($src); $sh = imagesy($src);
+                        $side = min($sw, $sh);
+                        $destSize = 400;
+                        $destX = ($w - $destSize) / 2;
+                        $destY = $h - 90 - $destSize - 30;
+                        imagecopyresampled($img, $src, $destX, $destY, ($sw - $side) / 2, ($sh - $side) / 2, $destSize, $destSize, $side, $side);
+                        imagedestroy($src);
+                    }
+                }
+            } catch (\Throwable $e) {}
+        }
+
+        ob_start();
+        imagepng($img);
+        $png = ob_get_clean();
+        imagedestroy($img);
+
+        return response($png, 200)
+            ->header('Content-Type', 'image/png')
+            ->header('Cache-Control', 'public, max-age=3600');
+    }
+
+    private function gdDrawWrapped($img, $font, $size, $color, $text, $x, $y, $maxWidth, $lineH): void
+    {
+        $words = preg_split('/\s+/u', $text);
+        $line  = '';
+        $curY  = $y;
+        $count = 0;
+
+        foreach ($words as $word) {
+            $test = $line ? "$line $word" : $word;
+            $bbox = imagettfbbox($size, 0, $font, $test);
+            if (($bbox[2] - $bbox[0]) > $maxWidth && $line !== '') {
+                imagettftext($img, $size, 0, $x, $curY, $color, $font, $line);
+                $line = $word; $curY += $lineH; $count++;
+                if ($count >= 12) { $line = ''; break; }
+            } else { $line = $test; }
+        }
+        if ($line) imagettftext($img, $size, 0, $x, $curY, $color, $font, $line);
     }
 }

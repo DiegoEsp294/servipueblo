@@ -26,6 +26,9 @@ Route::get('/trabajadores/{worker:slug}', [WorkerController::class, 'show'])->na
 Route::get('/trabajadores/{worker:slug}/whatsapp', [WorkerController::class, 'trackWhatsapp'])->name('workers.whatsapp');
 Route::post('/trabajadores/{worker:slug}/compartir', [WorkerController::class, 'trackShare'])->name('workers.share');
 
+Route::get('/trabajadores/{worker:slug}/novedad/{post}', [WorkerProfileController::class, 'showPost'])->name('worker.post.show');
+Route::get('/trabajadores/{worker:slug}/novedad/{post}/imagen.png', [WorkerProfileController::class, 'postShareImage'])->name('worker.post.image');
+
 Route::get('/emprendimientos/{worker:slug}', [WorkerController::class, 'show'])->name('entrepreneurs.show');
 Route::get('/emprendimientos/{worker:slug}/whatsapp', [WorkerController::class, 'trackWhatsapp'])->name('entrepreneurs.whatsapp');
 Route::post('/emprendimientos/{worker:slug}/compartir', [WorkerController::class, 'trackShare'])->name('entrepreneurs.share');
