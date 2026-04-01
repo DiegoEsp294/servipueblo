@@ -16,10 +16,10 @@ use Illuminate\Support\Facades\Route;
 // ── Rutas públicas ───────────────────────────────────────────────────────────
 
 Route::get('/ping', fn() => response('', 204));
+Route::get('/offline', fn() => view('offline'))->name('offline');
 Route::get('/en/{catSlug}', [\App\Http\Controllers\CategoryLandingController::class, 'show'])->name('category.landing');
 Route::get('/en/{catSlug}/{townSlug}', [\App\Http\Controllers\CategoryLandingController::class, 'show'])->name('category.landing.town');
-Route::get('/offline', fn() => view('offline'))->name('offline');
-Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index']);
+
 
 Route::get('/', [WorkerController::class, 'index'])->name('home');
 Route::get('/trabajadores', [WorkerController::class, 'index'])->name('workers.index');
