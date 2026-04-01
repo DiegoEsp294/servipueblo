@@ -18,5 +18,8 @@ php artisan db:seed --class=AdminUserSeeder --force
 php artisan config:cache
 php artisan view:cache
 
+# Generar sitemap estático (evita que Google lo lea mientras Render hiberna)
+php artisan sitemap:generate
+
 # Iniciar servidor
 exec php artisan serve --host=0.0.0.0 --port=${PORT:-10000}
