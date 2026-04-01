@@ -23,8 +23,21 @@
     <meta name="twitter:description" content="@yield('og_description', 'Directorio de trabajadores en pueblos pequeños.')">
     <meta name="twitter:image" content="@yield('og_image', asset('images/og-default.png'))">
 
+    {{-- JSON-LD WebSite (para que Google muestre "ServiPueblo" en lugar del hosting) --}}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "ServiPueblo",
+      "alternateName": "ServiPueblo",
+      "url": "{{ url('/') }}",
+      "description": "Directorio de trabajadores y emprendimientos en pueblos pequeños de Argentina"
+    }
+    </script>
+
     @stack('meta')
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛠️</text></svg>">
+    <link rel="icon" type="image/png" href="/icons/icon-gpt.png">
+    <link rel="shortcut icon" type="image/png" href="/icons/icon-gpt.png">
 
     {{-- PWA --}}
     <link rel="manifest" href="/manifest.json">
@@ -33,7 +46,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="ServiPueblo">
-    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <link rel="apple-touch-icon" href="/icons/icon-gpt.png">
 
     <link rel="stylesheet" href="{{ mix('css/app.css') }}">
 </head>

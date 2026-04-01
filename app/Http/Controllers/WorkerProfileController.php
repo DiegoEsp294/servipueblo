@@ -232,11 +232,13 @@ class WorkerProfileController extends Controller
 
         $fontBold = null; $fontRegular = null;
         foreach ([
+            '/tmp/sp-fonts/Bold.ttf',
             '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
             '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf',
             '/usr/share/fonts/truetype/freefont/FreeSansBold.ttf',
         ] as $f) { if (file_exists($f)) { $fontBold = $f; break; } }
         foreach ([
+            '/tmp/sp-fonts/Regular.ttf',
             '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
             '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
             '/usr/share/fonts/truetype/freefont/FreeSans.ttf',
@@ -268,20 +270,24 @@ class WorkerProfileController extends Controller
 
         if ($post->photo_path) {
             try {
-                $data = @file_get_contents($post->photo_url);
-                if ($data) {
-                    $src = @imagecreatefromstring($data);
-                    if ($src) {
-                        $sw = imagesx($src); $sh = imagesy($src);
-                        $side = min($sw, $sh);
-                        $destSize = 400;
-                        $destX = (int)(($w - $destSize) / 2);
-                        $destY = $h - 90 - $destSize - 30;
-                        imagecopyresampled($img, $src, $destX, $destY, (int)(($sw - $side) / 2), (int)(($sh - $side) / 2), $destSize, $destSize, $side, $side);
-                        imagedestroy($src);
-                    }
+                $data = Storage::get($post->photo_path);
+            } catch (\Throwable $e) { $data = null; }
+            if (!$data && $post->photo_url) {
+                $ctx  = stream_context_create(['http' => ['timeout' => 8], 'https' => ['timeout' => 8]]);
+                $data = @file_get_contents($post->photo_url, false, $ctx) ?: null;
+            }
+            if ($data) {
+                $src = @imagecreatefromstring($data);
+                if ($src) {
+                    $sw = imagesx($src); $sh = imagesy($src);
+                    $side = min($sw, $sh);
+                    $destSize = 400;
+                    $destX = (int)(($w - $destSize) / 2);
+                    $destY  = $h - 90 - $destSize - 30;
+                    imagecopyresampled($img, $src, $destX, $destY, (int)(($sw - $side) / 2), (int)(($sh - $side) / 2), $destSize, $destSize, $side, $side);
+                    imagedestroy($src);
                 }
-            } catch (\Throwable $e) {}
+            }
         }
 
         ob_start();
