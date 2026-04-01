@@ -18,8 +18,16 @@ php artisan db:seed --class=AdminUserSeeder --force
 php artisan config:cache
 php artisan view:cache
 
-# Generar sitemap estático (evita que Google lo lea mientras Render hiberna)
+# Generar sitemap estático
 php artisan sitemap:generate
 
-# Iniciar servidor
-exec php artisan serve --host=0.0.0.0 --port=${PORT:-10000}
+# Iniciar servidor en background, esperar que arranque, calentar el sitemap en Cloudflare
+php artisan serve --host=0.0.0.0 --port=${PORT:-10000} &
+SERVER_PID=$!
+
+# Esperar que el servidor esté listo
+sleep 5
+curl -s "http://localhost:${PORT:-10000}/sitemap.xml" -o /dev/null || true
+
+# Traer el proceso al frente
+wait $SERVER_PID

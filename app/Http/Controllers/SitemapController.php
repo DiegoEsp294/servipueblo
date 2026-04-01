@@ -10,15 +10,15 @@ class SitemapController extends Controller
 {
     public function index()
     {
-        // Servir el archivo estático si existe (generado por generate())
         $static = public_path('sitemap.xml');
-        if (file_exists($static)) {
-            return response(file_get_contents($static), 200)
-                ->header('Content-Type', 'application/xml')
-                ->header('Cache-Control', 'public, max-age=3600');
-        }
+        $content = file_exists($static) ? file_get_contents($static) : $this->build();
 
-        return response($this->build(), 200)->header('Content-Type', 'application/xml');
+        return response($content, 200)
+            ->header('Content-Type', 'application/xml')
+            ->header('Cache-Control', 'public, max-age=86400')   // Cloudflare cachea 24hs
+            ->header('CDN-Cache-Control', 'public, max-age=86400')
+            ->header('Cloudflare-CDN-Cache-Control', 'public, max-age=86400')
+            ->header('Vary', 'Accept-Encoding');
     }
 
     public function generate()
