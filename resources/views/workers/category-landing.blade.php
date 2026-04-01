@@ -91,7 +91,7 @@
 @if($workers->isNotEmpty())
 <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
     @foreach($workers as $worker)
-        @include('components.worker-card', ['worker' => $worker])
+        <x-worker-card :worker="$worker" />
     @endforeach
 </div>
 @else
