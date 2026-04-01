@@ -43,8 +43,9 @@ class RouteServiceProvider extends ServiceProvider
                 ->namespace($this->namespace)
                 ->group(base_path('routes/api.php'));
 
-            // Rutas sin sesión para crawlers (sitemap, robots)
-            Route::namespace($this->namespace)
+            // Rutas completamente sin middleware (sitemap, ping, robots)
+            Route::middleware([])
+                ->namespace($this->namespace)
                 ->group(base_path('routes/static.php'));
 
             Route::middleware('web')

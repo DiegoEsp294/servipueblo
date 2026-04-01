@@ -15,7 +15,6 @@ use Illuminate\Support\Facades\Route;
 
 // ── Rutas públicas ───────────────────────────────────────────────────────────
 
-Route::get('/ping', fn() => response('', 204));
 Route::get('/offline', fn() => view('offline'))->name('offline');
 Route::get('/en/{catSlug}', [\App\Http\Controllers\CategoryLandingController::class, 'show'])->name('category.landing');
 Route::get('/en/{catSlug}/{townSlug}', [\App\Http\Controllers\CategoryLandingController::class, 'show'])->name('category.landing.town');
