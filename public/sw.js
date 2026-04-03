@@ -1,4 +1,4 @@
-const CACHE = 'servipueblo-v1';
+const CACHE = 'servipueblo-v2';
 
 const PRECACHE = [
   '/offline',
@@ -51,11 +51,12 @@ self.addEventListener('fetch', event => {
   }
 
   if (isPage) {
-    // Páginas: network first, offline fallback
+    // Páginas: siempre network first, nunca cachear páginas autenticadas
     event.respondWith(
       fetch(req)
         .then(res => {
-          if (res.ok) {
+          // No cachear errores ni páginas con sesión
+          if (res.ok && !res.url.includes('/mi-perfil') && !res.url.includes('/admin') && !res.url.includes('/login')) {
             const clone = res.clone();
             caches.open(CACHE).then(c => c.put(req, clone));
           }
