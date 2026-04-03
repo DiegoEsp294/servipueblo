@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
+use Illuminate\Session\TokenMismatchException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -37,6 +38,12 @@ class Handler extends ExceptionHandler
     {
         $this->reportable(function (Throwable $e) {
             //
+        });
+
+        $this->renderable(function (TokenMismatchException $e, $request) {
+            return redirect()->route('login')
+                ->withInput($request->except('password'))
+                ->with('error', 'Tu sesión expiró. Por favor iniciá sesión nuevamente.');
         });
 
         $this->renderable(function (ThrottleRequestsException $e, $request) {

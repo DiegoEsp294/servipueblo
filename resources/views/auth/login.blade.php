@@ -17,6 +17,12 @@
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
         <h1 class="text-lg font-semibold text-gray-800 mb-6">Iniciar sesión</h1>
 
+        @if(session('error'))
+            <div class="bg-amber-50 border border-amber-200 text-amber-700 rounded px-4 py-3 text-sm mb-4">
+                {{ session('error') }}
+            </div>
+        @endif
+
         @if($errors->any())
             <div class="bg-red-50 border border-red-200 text-red-700 rounded px-4 py-3 text-sm mb-4">
                 @foreach($errors->all() as $error)
