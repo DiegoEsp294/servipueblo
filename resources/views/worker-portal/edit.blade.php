@@ -3,7 +3,7 @@
 @section('title', 'Mi perfil — ' . $worker->name)
 
 @section('content')
-<div class="max-w-2xl mx-auto">
+<div class="max-w-2xl mx-auto overflow-hidden">
 
     {{-- Header --}}
     <div class="flex items-center gap-4 mb-6">
@@ -38,7 +38,7 @@
 
     <form method="POST" action="{{ route('worker.profile.update') }}"
           enctype="multipart/form-data"
-          class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 grid gap-5">
+          class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 grid gap-5">
         @csrf
         @method('PUT')
 
@@ -91,7 +91,7 @@
         {{-- Disponibilidad --}}
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Disponibilidad</label>
-            <div class="grid grid-cols-3 gap-2">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 @foreach(['available' => ['🟢', 'Disponible'], 'on_request' => ['🟡', 'Con aviso previo'], 'unavailable' => ['🔴', 'No disponible']] as $val => [$icon, $lbl])
                     @php $checked = old('availability', $worker->availability ?? 'available') === $val; @endphp
                     <label class="flex items-center gap-2 border rounded-lg px-3 py-2.5 cursor-pointer transition-colors
@@ -140,11 +140,11 @@
             <div class="border border-gray-200 rounded-lg overflow-hidden">
                 @foreach($days as $day => $name)
                 @php $h = $hoursByDay->get($day); @endphp
-                <div class="flex items-center gap-3 px-3 py-2.5 border-b border-gray-100 last:border-0
+                <div class="flex flex-wrap items-center gap-2 px-3 py-2.5 border-b border-gray-100 last:border-0
                             {{ $loop->even ? 'bg-gray-50' : 'bg-white' }}">
-                    <span class="text-sm font-medium text-gray-700 w-20 shrink-0">{{ $name }}</span>
+                    <span class="text-sm font-medium text-gray-700 w-16 shrink-0">{{ $name }}</span>
 
-                    <label class="flex items-center gap-1.5 cursor-pointer shrink-0">
+                    <label class="flex items-center gap-1 cursor-pointer shrink-0">
                         <input type="checkbox" name="hours[{{ $day }}][closed]" value="1"
                                class="day-closed-check accent-red-500"
                                data-day="{{ $day }}"
@@ -152,15 +152,15 @@
                         <span class="text-xs text-gray-500">Cerrado</span>
                     </label>
 
-                    <div class="flex items-center gap-1.5 flex-1 day-times-{{ $day }}
+                    <div class="flex items-center gap-1 day-times-{{ $day }} min-w-0
                                 {{ optional($h)->is_closed ? 'opacity-30 pointer-events-none' : '' }}">
                         <input type="time" name="hours[{{ $day }}][open]"
                                value="{{ optional($h)->open_time }}"
-                               class="flex-1 border border-gray-200 rounded px-2 py-1 text-sm text-center">
-                        <span class="text-gray-400 text-xs">a</span>
+                               class="w-28 border border-gray-200 rounded px-1 py-1 text-xs text-center">
+                        <span class="text-gray-400 text-xs shrink-0">a</span>
                         <input type="time" name="hours[{{ $day }}][close]"
                                value="{{ optional($h)->close_time }}"
-                               class="flex-1 border border-gray-200 rounded px-2 py-1 text-sm text-center">
+                               class="w-28 border border-gray-200 rounded px-1 py-1 text-xs text-center">
                     </div>
                 </div>
                 @endforeach
